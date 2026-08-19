@@ -1,0 +1,21 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-playfair), ui-serif, Georgia, serif;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* Prose / rich text rendering in published pages */
+.prose p { margin-bottom: 1em; }
+.prose a { color: inherit; text-decoration: underline; }
+.prose strong, .prose b { font-weight: 700; }
+.prose em, .prose i { font-style: italic; }
+.prose u { text-decoration: underline; }
+.prose s, .prose strike { text-decoration: line-through; }
+.prose ul { list-style: disc; padding-left: 1.5em; margin-bottom: 1em; }
+.prose ol { list-style: decimal; padding-left: 1.5em; margin-bottom: 1em; }
+.prose h1, .prose h2, .prose h3, .prose h4, .prose h5 { font-weight: 700; margin-bottom: 0.5em; margin-top: 1.2em; }

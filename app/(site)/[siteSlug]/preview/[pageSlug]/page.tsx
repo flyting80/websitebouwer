@@ -1,0 +1,47 @@
+export const dynamic = "force-dynamic";
+export const metadata = { robots: { index: false, follow: false } };
+import { redirect } from "next/navigation";
+import { notFound } from "next/navigation";
+import { db } from "@/lib/db";
+import { pages as pagesTable } from "@/lib/db";
+import { and, eq } from "drizzle-orm";
+import { auth } from "@/lib/auth";
+import { SiteLayout as SiteWrapper } from "@/components/site/SiteLayout";
+import { ResponsivePageContent } from "@/components/site/ResponsivePageContent";
+import { parseBlocks } from "@/lib/page-blocks";
+import { loadSiteChrome } from "@/lib/load-site-chrome";
+
+export default async function PreviewPageRoute({
+  params,
+}: {
+  params: Promise<{ siteSlug: string; pageSlug: string }>;
+}) {
+  const session = await auth();
+  if (!session) redirect("/admin/login");
+
+  const { siteSlug, pageSlug } = await params;
+  const chrome = await loadSiteChrome(siteSlug);
+  if (!chrome) notFound();
+
+  const [page] = await db.select().from(pagesTable).where(
+    and(eq(pagesTable.siteId, chrome.site.id), eq(pagesTable.slug, pageSlug))
+  );
+  if (!page) notFound();
+
+  const blocks = parseBlocks(page.draftBlocks);
+  const mobileBlocksParsed = parseBlocks(page.draftBlocksMobile);
+
+  return (
+    <SiteWrapper site={chrome.site} theme={chrome.themeRecord} navItems={chrome.nav} settings={chrome.settings} preview>
+      <ResponsivePageContent
+        desktopBlocks={blocks}
+        mobileBlocks={mobileBlocksParsed}
+        site={chrome.site}
+        theme={chrome.themeRecord}
+        navItems={chrome.nav}
+        settings={chrome.settings}
+        emptyLabel="Dit concept is nog leeg."
+      />
+    </SiteWrapper>
+  );
+}
