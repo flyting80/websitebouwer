@@ -1,3 +1,5 @@
+import { APP_NAME } from "@/lib/app-branding";
+
 export default function VerifyPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-amber-50">
@@ -5,7 +7,7 @@ export default function VerifyPage() {
         <div className="text-4xl mb-4">✉️</div>
         <h1 className="text-xl font-bold text-stone-800 mb-2">Controleer je inbox</h1>
         <p className="text-stone-500 text-sm">
-          We hebben een inloglink gestuurd. Klik op de link in de mail om toegang te krijgen tot Saf4.
+          We hebben een inloglink gestuurd. Klik op de link in de mail om toegang te krijgen tot de {APP_NAME}.
         </p>
       </div>
     </div>

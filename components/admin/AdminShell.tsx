@@ -22,6 +22,7 @@ import { cn } from "@/lib/utils";
 import { signOut } from "next-auth/react";
 import { useSiteStore } from "@/lib/stores/siteStore";
 import { GlobalSiteLoader } from "./GlobalSiteLoader";
+import { APP_NAME } from "@/lib/app-branding";
 
 const navItems = [
   { label: "Pagina's", href: "/admin/pages", icon: FileText },
@@ -64,7 +65,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
       >
         {/* Logo */}
         <div className="flex items-center gap-2 px-5 py-4 border-b border-amber-800">
-          <span className="text-2xl font-bold font-serif">Saf4</span>
+          <span className="text-2xl font-bold font-serif">{APP_NAME}</span>
           <button
             className="ml-auto lg:hidden text-amber-200 hover:text-white"
             onClick={() => setSidebarOpen(false)}
@@ -151,9 +152,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
                   </>
                 )}
               </span>
-            ) : (
-              "Saf4 — Website editor"
-            )}
+            ) : APP_NAME}
           </span>
         </header>
 

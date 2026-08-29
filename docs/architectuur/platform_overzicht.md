@@ -1,8 +1,8 @@
-# Platformoverzicht — Saf4 Website Builder
+# Platformoverzicht — Websitebeheertool
 
 ## Wat is het?
 
-Saf4 is een **multi-site website builder**: één installatie waarmee je meerdere losse websites beheert vanuit één admin-paneel. Elke site heeft eigen thema, pagina's, navigatie, blog, podcast en media.
+De **Websitebeheertool** is een **multi-site website builder**: één installatie waarmee je meerdere losse websites beheert vanuit één admin-paneel. Elke site heeft eigen thema, pagina's, navigatie, blog, podcast en media.
 
 ## Drie lagen
 

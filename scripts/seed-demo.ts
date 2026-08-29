@@ -2,7 +2,7 @@
  * Vult de lokale database met een demo-site en een testgebruiker.
  * Gebruik: npx tsx scripts/seed-demo.ts
  *
- * Na het seeden kun je inloggen met: test@saf4.local
+ * Na het seeden kun je inloggen met: test@websitebeheer.local
  * (magic-link wordt overgeslagen — sessie wordt direct aangemaakt)
  */
 import Database from "better-sqlite3";
@@ -21,7 +21,7 @@ const userId = id();
 db.prepare(`
   INSERT OR IGNORE INTO users (id, email, name, created_at)
   VALUES (?, ?, ?, ?)
-`).run(userId, "test@saf4.local", "Saf4 Testgebruiker", now());
+`).run(userId, "test@websitebeheer.local", "Websitebeheertool Testgebruiker", now());
 
 // ── 2. Sessie aanmaken (directe toegang zonder e-mail) ────────────────────────
 const sessionToken = crypto.randomBytes(32).toString("hex");

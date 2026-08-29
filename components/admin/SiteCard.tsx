@@ -15,7 +15,7 @@ export function SiteCard({ site }: { site: Site }) {
       <div className="flex-1 min-w-0">
         <p className="font-semibold text-stone-800">{site.name}</p>
         <p className="text-stone-400 text-sm truncate">
-          {site.domain ?? `${site.slug}.saf4.nl`}
+          {site.domain ?? `/${site.slug}`}
         </p>
       </div>
       <Link

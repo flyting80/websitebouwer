@@ -89,9 +89,8 @@ export function SiteLayout({
                 ))}
               </div>
             </div>
-            <div className="border-t border-white/10 mt-6 pt-4 text-xs opacity-40 flex justify-between">
+            <div className="border-t border-white/10 mt-6 pt-4 text-xs opacity-40">
               <span>© {new Date().getFullYear()} {site.name}</span>
-              <span>Gemaakt met Saf4</span>
             </div>
           </div>
         </footer>

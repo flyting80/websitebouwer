@@ -1,5 +1,5 @@
 /**
- * Geautomatiseerde API-test voor Saf4
+ * Geautomatiseerde API-test voor Websitebeheertool
  * Gebruik: npx tsx scripts/test-api.ts
  *
  * Test alle belangrijke API-endpoints met de lokale SQLite-database.
@@ -71,7 +71,7 @@ async function del(path: string) {
 }
 
 async function runTests() {
-console.log("\n🧪 Saf4 API Tests\n");
+console.log("\n🧪 Websitebeheertool API Tests\n");
 
 // ── Authenticatie ──────────────────────────────────────────────────────────
 console.log("▶ Authenticatie");

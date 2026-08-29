@@ -4,15 +4,15 @@ Centrale inventaris van environment variables. **Geen echte secrets in dit docum
 
 ## Matrix
 
-| Variabele | Lokaal | Vercel preview | saf4.nl prod | Geheim |
+| Variabele | Lokaal | Vercel preview | Productie | Geheim |
 |-----------|--------|----------------|--------------|--------|
 | `DATABASE_URL` | `local` | Supabase URI | Supabase URI | ✅ |
 | `AUTH_SECRET` | dev string (≥32) | random hex | random hex | ✅ |
 | `AUTH_RESEND_KEY` | optioneel | `re_...` | `re_...` | ✅ |
 | `RESEND_API_KEY` | optioneel | `re_...` | `re_...` | ✅ |
-| `EMAIL_FROM` | `noreply@...` | sandbox/test | `noreply@saf4.nl` | |
-| `NEXTAUTH_URL` | `http://localhost:3001` | `https://*.vercel.app` | `https://saf4.nl` | |
-| `NEXT_PUBLIC_SITE_URL` | — | `https://*.vercel.app` | `https://saf4.nl` | |
+| `EMAIL_FROM` | `noreply@...` | sandbox/test | `noreply@jouwdomein.nl` | |
+| `NEXTAUTH_URL` | `http://localhost:3001` | `https://*.vercel.app` | `https://jouwdomein.nl` | |
+| `NEXT_PUBLIC_SITE_URL` | — | `https://*.vercel.app` | `https://jouwdomein.nl` | |
 | `STORAGE_PROVIDER` | — (local default) | `s3` | `s3` | |
 | `STORAGE_ENDPOINT` | — | Supabase S3 URL | idem | |
 | `STORAGE_REGION` | — | `eu-central-1` | idem | |
@@ -43,4 +43,4 @@ Centrale inventaris van environment variables. **Geen echte secrets in dit docum
 ## Deploy-checklist koppeling
 
 - Deel 1: [`docs/deploy/DEEL_1_VERCEL_SUPABASE.md`](../deploy/DEEL_1_VERCEL_SUPABASE.md)
-- Deel 2: [`docs/deploy/DEEL_2_SAF4_NL.md`](../deploy/DEEL_2_SAF4_NL.md)
+- Deel 2: [`docs/deploy/DEEL_2_PRODUCTIEDOMEIN.md`](../deploy/DEEL_2_PRODUCTIEDOMEIN.md)

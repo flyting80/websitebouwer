@@ -71,7 +71,7 @@ export async function POST(req: NextRequest) {
     try {
       const resend = new Resend(process.env.RESEND_API_KEY);
       await resend.emails.send({
-        from: process.env.EMAIL_FROM ?? "noreply@saf4.nl",
+        from: process.env.EMAIL_FROM ?? "noreply@jouwdomein.nl",
         to: site.contactEmail,
         subject: `Nieuw bericht van ${name}: ${subject ?? "Contactformulier"}`,
         html: `

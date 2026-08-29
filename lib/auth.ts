@@ -12,6 +12,7 @@ if (process.env.NODE_ENV === "production") {
 import Resend from "next-auth/providers/resend";
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import { accounts, sessions, users, verificationTokens } from "./db/schema-sqlite";
+import { APP_NAME } from "./app-branding";
 
 // Build the correct DB for auth (must be a real DB, not a Proxy)
 function buildAuthDb() {
@@ -47,8 +48,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   }),
   providers: [
     Resend({
-      from: process.env.EMAIL_FROM ?? "noreply@saf4.nl",
-      name: "Saf4",
+      from: process.env.EMAIL_FROM ?? "noreply@jouwdomein.nl",
+      name: APP_NAME,
     }),
   ],
   pages: {

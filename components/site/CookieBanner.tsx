@@ -16,7 +16,7 @@ export function CookieBanner({ siteId, siteSlug, enabled, primaryColor = "#d9770
   useEffect(() => {
     if (!enabled) return;
     try {
-      const stored = localStorage.getItem(`saf4-cookies-${siteId}`);
+      const stored = localStorage.getItem(`wb-cookies-${siteId}`);
       if (!stored) setVisible(true);
     } catch {
       setVisible(true);
@@ -25,7 +25,7 @@ export function CookieBanner({ siteId, siteSlug, enabled, primaryColor = "#d9770
 
   function choose(value: "accepted" | "rejected") {
     try {
-      localStorage.setItem(`saf4-cookies-${siteId}`, value);
+      localStorage.setItem(`wb-cookies-${siteId}`, value);
     } catch {
       /* ignore */
     }

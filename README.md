@@ -1,6 +1,8 @@
-# Saf4 — Website Builder
+# Websitebeheertool
 
 Multi-site website builder: admin, block-editor, en gepubliceerde klant-sites vanuit één Next.js app.
+
+> **Let op:** Saf4 (saf4.nl) is een **beheerde site** in deze tool — niet de naam van de beheerapplicatie zelf.
 
 ## Snel starten (lokaal)
 
@@ -15,7 +17,7 @@ npm run dev                    # http://localhost:3001/admin
 | Onderwerp | Link |
 |---------|------|
 | **Deploy deel 1** (Vercel + Supabase) | [docs/deploy/DEEL_1_VERCEL_SUPABASE.md](./docs/deploy/DEEL_1_VERCEL_SUPABASE.md) |
-| **Deploy deel 2** (saf4.nl) | [docs/deploy/DEEL_2_SAF4_NL.md](./docs/deploy/DEEL_2_SAF4_NL.md) |
+| **Deploy deel 2** (eigen domein) | [docs/deploy/DEEL_2_PRODUCTIEDOMEIN.md](./docs/deploy/DEEL_2_PRODUCTIEDOMEIN.md) |
 | Documentstructuur | [docs/README_documentstructuur.md](./docs/README_documentstructuur.md) |
 | Platform & architectuur | [docs/architectuur/platform_overzicht.md](./docs/architectuur/platform_overzicht.md) |
 | Technologiekeuzes | [docs/architectuur/technologie_keuzes.md](./docs/architectuur/technologie_keuzes.md) |
@@ -32,7 +34,7 @@ Next.js 16 · Drizzle ORM · Supabase (Postgres + Storage) · NextAuth · Resend
 ```text
 GitHub → Vercel → Supabase (DB + Storage) + Resend (mail)
                       ↓
-              saf4.nl (DNS)
+              jouw-domein.nl (DNS)
 ```
 
 Zie [docs/architectuur/technologie_keuzes.md](./docs/architectuur/technologie_keuzes.md) voor rationale en alternatieven.
@@ -49,4 +51,4 @@ npm run db:seed      # Demo data (alleen SQLite lokaal)
 ## Repository
 
 - GitHub: `https://github.com/flyting80/websitebouwer`
-- Productiedomein (doel): `https://saf4.nl`
+- Productiedomein beheertool (voorbeeld): configureerbaar via Vercel Domains

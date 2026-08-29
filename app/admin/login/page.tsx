@@ -1,6 +1,7 @@
 "use client";
 import { signIn } from "next-auth/react";
 import { useState } from "react";
+import { APP_NAME } from "@/lib/app-branding";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -19,8 +20,8 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-amber-50">
       <div className="w-full max-w-sm bg-white rounded-2xl shadow-lg p-8">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-amber-800 font-serif">Saf4</h1>
-          <p className="text-stone-500 mt-1 text-sm">Website editor</p>
+          <h1 className="text-3xl font-bold text-amber-800 font-serif">{APP_NAME}</h1>
+          <p className="text-stone-500 mt-1 text-sm">Beheer je websites</p>
         </div>
 
         {sent ? (

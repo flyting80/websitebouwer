@@ -1,4 +1,4 @@
-## Saf4 Website Builder
+## Websitebeheertool
 
 Bedankt voor je bijdrage. Lees eerst de documentatie:
 

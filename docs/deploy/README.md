@@ -4,8 +4,8 @@ Deploy in **twee fasen**:
 
 | Deel | Doel | Resultaat |
 |------|------|-----------|
-| [**Deel 1 — Vercel + Supabase**](./DEEL_1_VERCEL_SUPABASE.md) | Eerste live test | Admin + sites op `*.vercel.app` |
-| [**Deel 2 — saf4.nl**](./DEEL_2_SAF4_NL.md) | Productie-domein | Zelfde stack op `https://saf4.nl` |
+| [**Deel 1 — Vercel + Supabase**](./DEEL_1_VERCEL_SUPABASE.md) | Eerste live test | Websitebeheertool op `*.vercel.app` |
+| [**Deel 2 — Productiedomein**](./DEEL_2_PRODUCTIEDOMEIN.md) | Eigen domein | Zelfde stack op jouw domein |
 
 ## Volgorde
 
@@ -14,7 +14,7 @@ Lokaal werken (SQLite)
        ↓
 Deel 1: Supabase project + Vercel deploy + smoke test
        ↓
-Deel 2: DNS saf4.nl → Vercel + env vars + e-mail domein
+Deel 2: DNS + env vars + e-mail domein
 ```
 
 ## Smoke test (na elke fase)

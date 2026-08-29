@@ -29,7 +29,7 @@ export function SiteDashboard({ site }: { site: Site }) {
         </div>
         <div>
           <h1 className="text-2xl font-bold text-stone-800">{site.name}</h1>
-          <p className="text-stone-400 text-sm">{site.domain ?? `${site.slug}.saf4.nl`}</p>
+          <p className="text-stone-400 text-sm">{site.domain ?? `/${site.slug}`}</p>
         </div>
       </div>
 

@@ -35,7 +35,7 @@ Geldige sessie (8 uur), redirect naar `/admin/sites`.
 - `AUTH_SECRET` — sessie-encryptie
 - `AUTH_RESEND_KEY` — Resend voor magic link
 - `EMAIL_FROM` — afzender (moet geverifieerd zijn bij Resend)
-- `NEXTAUTH_URL` — basis-URL voor callback (exact: `https://saf4.nl` in prod)
+- `NEXTAUTH_URL` — basis-URL voor callback (exact: `https://jouwdomein.nl` in prod)
 
 ## Risico's
 

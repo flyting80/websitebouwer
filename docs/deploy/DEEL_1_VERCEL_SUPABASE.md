@@ -91,7 +91,7 @@ https://[project-ref].supabase.co/storage/v1/object/public/media
 1. Account op [resend.com](https://resend.com)
 2. **API Keys → Create** → noteer `re_...`
 3. Voor eerste test: gebruik Resend sandbox (alleen naar je eigen geverifieerde e-mail)
-4. Later (deel 2): verifieer domein `saf4.nl` voor productie-mails
+4. Later (deel 2): verifieer je verzenddomein voor productie-mails
 
 ---
 
@@ -135,7 +135,7 @@ git push -u origin main
 | `AUTH_SECRET` | 64-char hex | ✅ |
 | `AUTH_RESEND_KEY` | `re_...` | ✅ |
 | `RESEND_API_KEY` | `re_...` (zelfde mag) | ✅ |
-| `EMAIL_FROM` | `onboarding@resend.dev` (test) of later `noreply@saf4.nl` | |
+| `EMAIL_FROM` | `onboarding@resend.dev` (test) of later `noreply@jouwdomein.nl` | |
 | `NEXTAUTH_URL` | `https://jouw-project.vercel.app` | |
 | `NEXT_PUBLIC_SITE_URL` | `https://jouw-project.vercel.app` | |
 | `STORAGE_PROVIDER` | `s3` | |
@@ -191,4 +191,4 @@ git push -u origin main
 
 ## Klaar voor deel 2?
 
-Als de smoke test groen is → [`DEEL_2_SAF4_NL.md`](./DEEL_2_SAF4_NL.md)
+Als de smoke test groen is → [`DEEL_2_PRODUCTIEDOMEIN.md`](./DEEL_2_PRODUCTIEDOMEIN.md)

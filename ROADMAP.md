@@ -1,19 +1,19 @@
-# ROADMAP — Saf4 Website Builder
+# ROADMAP — Websitebeheertool
 
-Laatste update: 2026-08-19
+Laatste update: 2026-08-29
 
 ## Nu uitvoeren (deploy)
 
 | # | Taak | Doc |
 |---|------|-----|
 | 1 | Deploy naar Vercel + Supabase | [`docs/deploy/DEEL_1_VERCEL_SUPABASE.md`](./docs/deploy/DEEL_1_VERCEL_SUPABASE.md) |
-| 2 | Productie op saf4.nl | [`docs/deploy/DEEL_2_SAF4_NL.md`](./docs/deploy/DEEL_2_SAF4_NL.md) |
+| 2 | Eigen productiedomein (bijv. beheer op Vercel custom domain) | [`docs/deploy/DEEL_2_PRODUCTIEDOMEIN.md`](./docs/deploy/DEEL_2_PRODUCTIEDOMEIN.md) |
 
 ## Hoog — na eerste live test
 
 | # | Taak | Waarom |
 |---|------|--------|
-| 3 | Custom domain root routing | `saf4.nl` of klantdomein zonder `/{slug}` |
+| 3 | Custom domain root routing | Beheerde site op eigen domein zonder `/{slug}` (bijv. saf4.nl als site, niet als toolnaam) |
 | 4 | Site-eigenaarschap (user ↔ site) | Multi-tenant veiligheid |
 | 5 | Blog block-editor in admin | Blog is nu half product |
 
@@ -42,6 +42,7 @@ Laatste update: 2026-08-19
 - Cloud storage abstractie (Supabase/R2/S3)
 - Preview-mode voor editor desktop/mobiel consistentie
 - Documentatie structuur (`docs/`)
+- Tool hernoemd naar **Websitebeheertool** (Saf4 = beheerde site, niet toolnaam)
 
 ## Documentatie
 

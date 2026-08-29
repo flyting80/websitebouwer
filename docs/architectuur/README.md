@@ -1,4 +1,4 @@
-# Flows — Saf4 Website Builder
+# Flows — Websitebeheertool
 
 Runtime-flows voor admin, builder en publieke sites.  
 Formaat gelijk aan Escapegame-core flowdocs: trigger → stappen → datapad → risico's.

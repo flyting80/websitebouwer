@@ -12,7 +12,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ site
     and(eq(blogPosts.siteId, site.id), eq(blogPosts.status, "published"))
   ).orderBy(desc(blogPosts.publishedAt)).limit(20);
 
-  const baseUrl = process.env.NEXTAUTH_URL ?? "https://saf4.nl";
+  const baseUrl = process.env.NEXTAUTH_URL ?? process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3001";
   const siteUrl = site.domain ? `https://${site.domain}` : `${baseUrl}/${siteSlug}`;
 
   const rss = `<?xml version="1.0" encoding="UTF-8"?>
