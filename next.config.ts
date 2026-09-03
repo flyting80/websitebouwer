@@ -47,6 +47,16 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "**" },
     ],
   },
+  // Next.js 16.3 collapses app/[siteSlug]/sitemap.ts to /-/sitemap.xml during build.
+  // Serve per-site sitemaps via API + rewrite so /{siteSlug}/sitemap.xml keeps working.
+  async rewrites() {
+    return [
+      {
+        source: "/:siteSlug/sitemap.xml",
+        destination: "/api/sites/:siteSlug/sitemap",
+      },
+    ];
+  },
   async headers() {
     return [
       {
