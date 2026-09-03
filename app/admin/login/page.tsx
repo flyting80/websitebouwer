@@ -28,7 +28,14 @@ function LoginForm() {
     setLoading(false);
 
     if (result?.error) {
-      setError("Onjuiste e-mail of wachtwoord.");
+      // Auth.js returns CredentialsSignin for wrong password / missing ADMIN_* env
+      if (result.error === "Configuration") {
+        setError("Serverconfiguratie fout (AUTH_SECRET). Check Vercel env vars + redeploy.");
+      } else {
+        setError(
+          "Login mislukt. Check of ADMIN_EMAIL en ADMIN_PASSWORD in Vercel staan (exacte namen) en of je na wijziging hebt redeployed."
+        );
+      }
       return;
     }
 

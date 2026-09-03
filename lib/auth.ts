@@ -26,8 +26,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         password: { label: "Wachtwoord", type: "password" },
       },
       async authorize(credentials) {
-        const adminEmail = process.env.ADMIN_EMAIL;
-        const adminPassword = process.env.ADMIN_PASSWORD;
+        const adminEmail = (process.env.ADMIN_EMAIL ?? "").trim();
+        const adminPassword = (process.env.ADMIN_PASSWORD ?? "").trim();
         if (!adminEmail || !adminPassword) {
           console.error("[auth] ADMIN_EMAIL of ADMIN_PASSWORD ontbreekt");
           return null;
@@ -35,12 +35,16 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         const email =
           typeof credentials?.email === "string" ? credentials.email.trim().toLowerCase() : "";
-        const password = typeof credentials?.password === "string" ? credentials.password : "";
+        const password =
+          typeof credentials?.password === "string" ? credentials.password.trim() : "";
         if (!email || !password) return null;
 
-        const emailOk = safeEqual(email, adminEmail.trim().toLowerCase());
+        const emailOk = safeEqual(email, adminEmail.toLowerCase());
         const passwordOk = safeEqual(password, adminPassword);
-        if (!emailOk || !passwordOk) return null;
+        if (!emailOk || !passwordOk) {
+          console.warn("[auth] login geweigerd (email/wachtwoord komt niet overeen)");
+          return null;
+        }
 
         return {
           id: "admin",
