@@ -12,9 +12,12 @@ function safeEqual(a: string, b: string): boolean {
   return mismatch === 0;
 }
 
+const authSecret = process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET;
+
 export const { handlers, auth, signIn, signOut } = NextAuth({
   trustHost: true,
-  secret: process.env.AUTH_SECRET,
+  // Only pass when set — `secret: undefined` triggers MissingSecret on Auth.js
+  ...(authSecret ? { secret: authSecret } : {}),
   providers: [
     Credentials({
       name: APP_NAME,
