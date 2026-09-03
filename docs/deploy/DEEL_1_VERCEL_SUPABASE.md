@@ -18,8 +18,7 @@ Vercel ────────────────────────�
   • Middleware (/admin bescherming)         │
         │                    │              │
         ▼                    ▼              ▼
- Supabase Postgres    Supabase Storage   Resend
- (DATABASE_URL)       (STORAGE_*=s3)     (login + contact)
+ Supabase Postgres    Supabase Storage
 ```
 
 **URLs na deploy:**
@@ -86,26 +85,24 @@ https://[project-ref].supabase.co/storage/v1/object/public/media
 
 ---
 
-## Stap 2 — Resend (e-mail)
+## Stap 2 — Admin-account en secret
 
-1. Account op [resend.com](https://resend.com)
-2. **API Keys → Create** → noteer `re_...`
-3. Voor eerste test: gebruik Resend sandbox (alleen naar je eigen geverifieerde e-mail)
-4. Later (deel 2): verifieer je verzenddomein voor productie-mails
+Kies een **e-mailadres en sterk wachtwoord** voor de enige beheerder.
 
----
-
-## Stap 3 — Secrets genereren
+Genereer daarna `AUTH_SECRET`:
 
 ```powershell
 node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 ```
 
-Bewaar als `AUTH_SECRET` (minimaal 32 tekens).
+Bewaar:
+- `ADMIN_EMAIL` — jouw e-mail
+- `ADMIN_PASSWORD` — sterk wachtwoord (min. 16 tekens)
+- `AUTH_SECRET` — 64-char hex
 
 ---
 
-## Stap 4 — GitHub
+## Stap 3 — GitHub
 
 Repo: `https://github.com/flyting80/websitebouwer`
 
@@ -119,7 +116,7 @@ git push -u origin main
 
 ---
 
-## Stap 5 — Vercel project
+## Stap 4 — Vercel project
 
 1. [vercel.com](https://vercel.com) → **Add New Project**
 2. Import **websitebouwer** van GitHub
@@ -133,9 +130,8 @@ git push -u origin main
 |-----------|--------|--------|
 | `DATABASE_URL` | Supabase Postgres URI (pooler) | ✅ |
 | `AUTH_SECRET` | 64-char hex | ✅ |
-| `AUTH_RESEND_KEY` | `re_...` | ✅ |
-| `RESEND_API_KEY` | `re_...` (zelfde mag) | ✅ |
-| `EMAIL_FROM` | `onboarding@resend.dev` (test) of later `noreply@jouwdomein.nl` | |
+| `ADMIN_EMAIL` | jouw admin e-mail | |
+| `ADMIN_PASSWORD` | sterk wachtwoord | ✅ |
 | `NEXTAUTH_URL` | `https://jouw-project.vercel.app` | |
 | `NEXT_PUBLIC_SITE_URL` | `https://jouw-project.vercel.app` | |
 | `STORAGE_PROVIDER` | `s3` | |
@@ -152,22 +148,22 @@ git push -u origin main
 
 ---
 
-## Stap 6 — Eerste login en site
+## Stap 5 — Eerste login en site
 
 1. Open `https://jouw-project.vercel.app/admin/login`
-2. Vul je e-mail in → open magic link
+2. Log in met `ADMIN_EMAIL` + `ADMIN_PASSWORD`
 3. **Sites → Nieuwe site** (bijv. slug `demo`)
 4. **Pagina's → Bewerken → Publiceren**
 5. Bezoek `https://jouw-project.vercel.app/demo`
 
 ---
 
-## Stap 7 — Smoke test checklist
+## Stap 6 — Smoke test checklist
 
 | # | Test | Verwacht |
 |---|------|----------|
 | 1 | `/api/health` | `{ "ok": true }` |
-| 2 | Magic link login | Redirect naar `/admin/sites` |
+| 2 | Wachtwoord-login | Redirect naar `/admin/sites` |
 | 3 | Site + pagina publiceren | Live URL toont content |
 | 4 | Media upload | Afbeelding zichtbaar (Supabase Storage URL) |
 | 5 | Contactformulier | Bericht in `/admin/messages` |
@@ -181,11 +177,10 @@ git push -u origin main
 | Symptoom | Oorzaak | Oplossing |
 |----------|---------|-----------|
 | Build faalt op AUTH_SECRET | Te kort / dev-default | Nieuwe 64-char hex in Vercel |
-| Magic link werkt niet | Verkeerde `NEXTAUTH_URL` | Exact Vercel-URL, https, geen slash |
+| Login werkt niet | Verkeerde credentials of `NEXTAUTH_URL` | Check `ADMIN_EMAIL`/`ADMIN_PASSWORD`; exact Vercel-URL |
 | Database error | Schema niet gepusht | `drizzle-kit push` met Supabase URL |
 | Upload faalt | Storage keys / bucket | Check S3 keys + bucket `media` public |
 | Lege homepage | Niet gepubliceerd | Opnieuw **Publiceren** in editor |
-| Geen e-mail | Resend sandbox | Alleen naar geverifieerd adres sturen |
 
 ---
 

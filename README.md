@@ -27,12 +27,12 @@ npm run dev                    # http://localhost:3001/admin
 
 ## Tech stack
 
-Next.js 16 · Drizzle ORM · Supabase (Postgres + Storage) · NextAuth · Resend · Vercel · Tailwind v4
+Next.js 16 · Drizzle ORM · Supabase (Postgres + Storage) · NextAuth · Vercel · Tailwind v4
 
 ## Productie-architectuur
 
 ```text
-GitHub → Vercel → Supabase (DB + Storage) + Resend (mail)
+GitHub → Vercel → Supabase (DB + Storage)
                       ↓
               jouw-domein.nl (DNS)
 ```

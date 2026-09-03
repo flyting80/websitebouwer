@@ -8,9 +8,8 @@ Centrale inventaris van environment variables. **Geen echte secrets in dit docum
 |-----------|--------|----------------|--------------|--------|
 | `DATABASE_URL` | `local` | Supabase URI | Supabase URI | ✅ |
 | `AUTH_SECRET` | dev string (≥32) | random hex | random hex | ✅ |
-| `AUTH_RESEND_KEY` | optioneel | `re_...` | `re_...` | ✅ |
-| `RESEND_API_KEY` | optioneel | `re_...` | `re_...` | ✅ |
-| `EMAIL_FROM` | `noreply@...` | sandbox/test | `noreply@jouwdomein.nl` | |
+| `ADMIN_EMAIL` | `admin@voorbeeld.nl` | zelfde | zelfde | |
+| `ADMIN_PASSWORD` | lokaal wachtwoord | sterk wachtwoord | sterk wachtwoord | ✅ |
 | `NEXTAUTH_URL` | `http://localhost:3001` | `https://*.vercel.app` | `https://jouwdomein.nl` | |
 | `NEXT_PUBLIC_SITE_URL` | — | `https://*.vercel.app` | `https://jouwdomein.nl` | |
 | `STORAGE_PROVIDER` | — (local default) | `s3` | `s3` | |

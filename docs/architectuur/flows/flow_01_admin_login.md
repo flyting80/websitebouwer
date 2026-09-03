@@ -1,24 +1,23 @@
-# Flow 01 — Admin login (magic link)
+# Flow 01 — Admin login (wachtwoord)
 
 ## Titel
 
-Beheerder logt in via e-mail magic link.
+Beheerder logt in met e-mail en wachtwoord.
 
 ## Trigger
 
-Gebruiker opent `/admin/login` en vult e-mailadres in.
+Gebruiker opent `/admin/login` en vult credentials in.
 
 ## Verwachte uitkomst
 
-Geldige sessie (8 uur), redirect naar `/admin/sites`.
+Geldige JWT-sessie (8 uur), redirect naar `/admin/sites`.
 
 ## Hoofdlijnen
 
-1. Formulier POST naar NextAuth Resend provider
-2. Resend stuurt magic link naar e-mail
-3. Gebruiker klikt link → `/api/auth/callback/resend`
-4. DrizzleAdapter maakt/update `users`, `sessions`, `verification_tokens`
-5. Middleware laat `/admin/*` door
+1. Formulier POST naar NextAuth Credentials provider
+2. Server vergelijkt met `ADMIN_EMAIL` + `ADMIN_PASSWORD` (env vars)
+3. Bij succes: JWT-sessie cookie
+4. Middleware laat `/admin/*` door
 
 ## Gedetailleerde stappen
 
@@ -26,25 +25,20 @@ Geldige sessie (8 uur), redirect naar `/admin/sites`.
 |---|------|---------|
 | 1 | Login form | `app/admin/login/page.tsx` |
 | 2 | NextAuth handler | `app/api/auth/[...nextauth]/route.ts` |
-| 3 | Auth config | `lib/auth.ts` — Resend provider, DrizzleAdapter |
-| 4 | DB (prod) | Supabase: `users`, `sessions`, `verification_tokens` |
-| 5 | Middleware check | `middleware.ts` — redirect naar login als geen sessie |
+| 3 | Auth config | `lib/auth.ts` — Credentials provider, JWT sessions |
+| 4 | Middleware check | `middleware.ts` — redirect naar login als geen sessie |
 
 ## Omgevingsvariabelen
 
-- `AUTH_SECRET` — sessie-encryptie
-- `AUTH_RESEND_KEY` — Resend voor magic link
-- `EMAIL_FROM` — afzender (moet geverifieerd zijn bij Resend)
-- `NEXTAUTH_URL` — basis-URL voor callback (exact: `https://jouwdomein.nl` in prod)
+- `AUTH_SECRET` — sessie-encryptie (min. 32 tekens)
+- `ADMIN_EMAIL` — enige admin-account
+- `ADMIN_PASSWORD` — wachtwoord (alleen in env, nooit in git)
+- `NEXTAUTH_URL` — basis-URL voor callback (exact productie-URL in prod)
 
 ## Risico's
 
 | Risico | Mitigatie |
 |--------|-----------|
-| Verkeerde `NEXTAUTH_URL` → link werkt niet | Exact productie-URL in Vercel |
-| Resend domein niet geverifieerd | DNS SPF/DKIM (deel 2 deploy) |
-| Zwak `AUTH_SECRET` | Runtime check blokkeert productie-start |
-
-## Dev-only alternatief
-
-`/api/dev-login` — alleen `NODE_ENV=development`, niet op Vercel productie.
+| Zwak wachtwoord | Sterk wachtwoord in Vercel env vars |
+| Verkeerde `NEXTAUTH_URL` | Exact productie-URL in Vercel |
+| `ADMIN_PASSWORD` in git | Alleen Vercel / `.env.local`, nooit committen |

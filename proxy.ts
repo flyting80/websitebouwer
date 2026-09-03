@@ -2,22 +2,26 @@ import { auth } from "@/lib/auth";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-export async function proxy(request: NextRequest) {
-  const { pathname } = request.nextUrl;
+export default auth((req) => {
+  const { nextUrl, auth: session } = req as NextRequest & { auth: { user?: unknown } | null };
+  const isAdminPath = nextUrl.pathname.startsWith("/admin");
+  const isAdminApiPath = nextUrl.pathname.startsWith("/api/admin");
+  const isAuthPath =
+    nextUrl.pathname.startsWith("/admin/login") ||
+    nextUrl.pathname.startsWith("/api/auth");
 
-  // Admin routes require authentication
-  if (pathname.startsWith("/admin")) {
-    const session = await auth();
-    if (!session && !pathname.startsWith("/admin/login")) {
-      const loginUrl = new URL("/admin/login", request.url);
-      return NextResponse.redirect(loginUrl);
+  if ((isAdminPath || isAdminApiPath) && !isAuthPath && !session?.user) {
+    if (isAdminApiPath) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-    return NextResponse.next();
+    const loginUrl = new URL("/admin/login", nextUrl.origin);
+    loginUrl.searchParams.set("callbackUrl", nextUrl.pathname);
+    return NextResponse.redirect(loginUrl);
   }
 
   return NextResponse.next();
-}
+});
 
 export const config = {
-  matcher: ["/admin/:path*"],
+  matcher: ["/admin/:path*", "/api/admin/:path*"],
 };

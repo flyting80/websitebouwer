@@ -1,17 +1,7 @@
 ﻿import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { contactSubmissions, sites } from "@/lib/db";
-
-function escapeHtml(str: string): string {
-  return str
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
-}
 import { eq } from "drizzle-orm";
-import { Resend } from "resend";
 import { z } from "zod";
 import { newId } from "@/lib/db/helpers";
 
@@ -66,28 +56,6 @@ export async function POST(req: NextRequest) {
     subject,
     message,
   });
-
-  if (site.contactEmail && process.env.RESEND_API_KEY) {
-    try {
-      const resend = new Resend(process.env.RESEND_API_KEY);
-      await resend.emails.send({
-        from: process.env.EMAIL_FROM ?? "noreply@jouwdomein.nl",
-        to: site.contactEmail,
-        subject: `Nieuw bericht van ${name}: ${subject ?? "Contactformulier"}`,
-        html: `
-          <h2>Nieuw contactbericht</h2>
-          <p><strong>Naam:</strong> ${escapeHtml(name)}</p>
-          <p><strong>E-mail:</strong> <a href="mailto:${escapeHtml(email)}">${escapeHtml(email)}</a></p>
-          ${subject ? `<p><strong>Onderwerp:</strong> ${escapeHtml(subject)}</p>` : ""}
-          <hr />
-          <p>${escapeHtml(message).replace(/\n/g, "<br>")}</p>
-        `,
-        replyTo: email,
-      });
-    } catch (e) {
-      console.error("Email send error:", e);
-    }
-  }
 
   return NextResponse.json({ ok: true });
 }
