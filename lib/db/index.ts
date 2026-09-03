@@ -1,14 +1,32 @@
 ﻿/* eslint-disable @typescript-eslint/no-require-imports, @typescript-eslint/no-explicit-any */
 
-const url = process.env.DATABASE_URL;
-const useLocal = !url || url === "local" || url.startsWith("file:");
-
 let _db: any = null;
+let _mode: "local" | "postgres" | null = null;
+
+function getDatabaseUrl(): string {
+  return (process.env.DATABASE_URL ?? "").trim();
+}
+
+function resolveMode(): "local" | "postgres" {
+  const url = getDatabaseUrl();
+  if (!url || url === "local" || url.startsWith("file:")) return "local";
+  return "postgres";
+}
 
 export function getDb(): any {
-  if (_db) return _db;
+  // Always resolve from process.env at call-time (never bake mode at module load /
+  // build time — that caused SQLite on Vercel when DATABASE_URL was only set at runtime).
+  const mode = resolveMode();
 
-  if (useLocal) {
+  if (_db && _mode === mode) return _db;
+
+  if (mode === "local") {
+    if (process.env.VERCEL) {
+      throw new Error(
+        "[db] DATABASE_URL ontbreekt op Vercel of staat op 'local'. " +
+          "Zet de Supabase Connection String (URI, Transaction pooler poort 6543) als DATABASE_URL en redeploy."
+      );
+    }
     const Database = require("better-sqlite3");
     const { drizzle } = require("drizzle-orm/better-sqlite3");
     const schema = require("./schema-sqlite");
@@ -21,12 +39,16 @@ export function getDb(): any {
     migrateLocalSqlite(sqlite);
     _db = drizzle(sqlite, { schema });
   } else {
-    const { neon } = require("@neondatabase/serverless");
-    const { drizzle } = require("drizzle-orm/neon-http");
+    const url = getDatabaseUrl();
+    // postgres.js + prepare:false is required for Supabase transaction pooler (:6543)
+    const postgres = require("postgres");
+    const { drizzle } = require("drizzle-orm/postgres-js");
     const schema = require("./schema");
-    _db = drizzle(neon(url), { schema });
+    const client = postgres(url, { prepare: false, max: 1 });
+    _db = drizzle(client, { schema });
   }
 
+  _mode = mode;
   return _db;
 }
 
