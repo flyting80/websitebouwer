@@ -4,6 +4,17 @@ let _db: any = null;
 let _mode: "local" | "postgres" | null = null;
 
 function getDatabaseUrl(): string {
+  // Prefer explicit DATABASE_URL; fall back to Supabase↔Vercel integration vars
+  const candidates = [
+    process.env.DATABASE_URL,
+    process.env.POSTGRES_PRISMA_URL,
+    process.env.POSTGRES_URL,
+  ];
+  for (const raw of candidates) {
+    const url = (raw ?? "").trim();
+    if (url && url !== "local" && !url.startsWith("file:")) return url;
+  }
+  // Keep last empty/local so diagnostics stay accurate
   return (process.env.DATABASE_URL ?? "").trim();
 }
 

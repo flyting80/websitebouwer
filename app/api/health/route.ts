@@ -3,7 +3,10 @@ import { NextResponse } from "next/server";
 export const dynamic = "force-dynamic";
 
 export async function GET() {
-  const raw = (process.env.DATABASE_URL ?? "").trim();
+  const raw =
+    (process.env.DATABASE_URL ?? "").trim() ||
+    (process.env.POSTGRES_PRISMA_URL ?? "").trim() ||
+    (process.env.POSTGRES_URL ?? "").trim();
   const mode =
     !raw || raw === "local" || raw.startsWith("file:") ? "local" : "postgres";
 
@@ -12,12 +15,19 @@ export async function GET() {
     ts: Date.now(),
     db: {
       mode,
-      // Never return the full URL — only safe diagnostics
-      hasDatabaseUrl: Boolean(raw),
+      hasDatabaseUrl: Boolean((process.env.DATABASE_URL ?? "").trim()),
+      hasPostgresUrl: Boolean((process.env.POSTGRES_URL ?? "").trim()),
+      hasPostgresPrismaUrl: Boolean((process.env.POSTGRES_PRISMA_URL ?? "").trim()),
       looksLikePostgres: raw.startsWith("postgres://") || raw.startsWith("postgresql://"),
-      isLocalLiteral: raw === "local",
+      isLocalLiteral: (process.env.DATABASE_URL ?? "").trim() === "local",
       length: raw.length,
-      // host hint without credentials
+      source: (process.env.DATABASE_URL ?? "").trim()
+        ? "DATABASE_URL"
+        : (process.env.POSTGRES_PRISMA_URL ?? "").trim()
+          ? "POSTGRES_PRISMA_URL"
+          : (process.env.POSTGRES_URL ?? "").trim()
+            ? "POSTGRES_URL"
+            : null,
       hostHint: (() => {
         if (!raw.startsWith("postgres")) return null;
         try {
