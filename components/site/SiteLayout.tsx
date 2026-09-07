@@ -38,8 +38,14 @@ export function SiteLayout({
     <SiteChromeProvider value={{ site, theme, navItems, settings }}>
       <div style={{ backgroundColor: theme.colorBackground, fontFamily: theme.fontBody, color: theme.colorText, minHeight: "100vh" }}>
         {preview && (
-          <div className="bg-amber-500 text-white text-center text-sm py-2 px-4">
-            Je bekijkt een concept. Bezoekers zien deze versie niet totdat je publiceert.
+          <div className="bg-amber-500 text-white text-center text-sm py-2 px-4 flex items-center justify-center gap-4 flex-wrap">
+            <span>Je bekijkt een concept. Bezoekers zien deze versie niet totdat je publiceert.</span>
+            <a
+              href="/admin/pages"
+              className="underline font-medium hover:text-amber-100"
+            >
+              Terug naar editor
+            </a>
           </div>
         )}
         {showHeader && (

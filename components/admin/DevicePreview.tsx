@@ -1,16 +1,20 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Monitor, Smartphone } from "lucide-react";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { ArrowLeft, Monitor, Smartphone } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { MobilePhoneIframePreview } from "@/components/editor/MobilePhoneFrame";
 
 interface Props {
   src: string;
   initialDevice?: "desktop" | "mobile";
+  /** Optional deep-link back to the page editor */
+  backHref?: string | null;
 }
 
-export function DevicePreview({ src, initialDevice = "desktop" }: Props) {
+export function DevicePreview({ src, initialDevice = "desktop", backHref }: Props) {
   const [device, setDevice] = useState<"desktop" | "mobile">(initialDevice);
   const safeSrc = useMemo(() => {
     if (!src.startsWith("/") || src.startsWith("//")) return "/";
@@ -20,6 +24,23 @@ export function DevicePreview({ src, initialDevice = "desktop" }: Props) {
   return (
     <div className="flex flex-col h-[calc(100vh-3.5rem)] -m-6 bg-stone-200">
       <div className="h-12 bg-white border-b border-stone-200 flex items-center px-4 gap-3 shrink-0">
+        {backHref ? (
+          <Link
+            href={backHref}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-stone-700 border border-stone-200 rounded-lg hover:bg-stone-50"
+          >
+            <ArrowLeft size={14} />
+            Terug naar editor
+          </Link>
+        ) : (
+          <Link
+            href="/admin/pages"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-stone-700 border border-stone-200 rounded-lg hover:bg-stone-50"
+          >
+            <ArrowLeft size={14} />
+            Terug
+          </Link>
+        )}
         <p className="text-sm font-medium text-stone-700">Voorvertoning</p>
         <div className="flex items-center gap-0.5 bg-stone-100 rounded-lg p-0.5">
           <button
@@ -69,4 +90,12 @@ export function DevicePreview({ src, initialDevice = "desktop" }: Props) {
       </div>
     </div>
   );
+}
+
+/** Thin wrapper that also reads ?from= for the back link */
+export function DevicePreviewFromQuery({ src, initialDevice }: { src: string; initialDevice?: "desktop" | "mobile" }) {
+  const params = useSearchParams();
+  const from = params.get("from");
+  const backHref = from && from.startsWith("/admin/") ? from : null;
+  return <DevicePreview src={src} initialDevice={initialDevice} backHref={backHref} />;
 }

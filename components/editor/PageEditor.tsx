@@ -379,7 +379,7 @@ export function PageEditor({ page, site, theme }: Props) {
         </span>
 
         <Link
-          href={`/admin/preview?path=${encodeURIComponent(previewHref)}&device=desktop`}
+          href={`/admin/preview?path=${encodeURIComponent(previewHref)}&device=desktop&from=${encodeURIComponent(`/admin/pages/${page.id}/edit`)}`}
           className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-amber-800 hover:text-amber-950 border border-amber-200 bg-amber-50 rounded-lg transition-colors"
         >
           <Eye size={13} />

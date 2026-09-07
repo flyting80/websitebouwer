@@ -23,7 +23,7 @@ import { BlockRenderer } from "./BlockRenderer";
 import { PALETTE_ITEMS } from "./BlockPalette";
 import { MobilePhoneFrame } from "./MobilePhoneFrame";
 import { applyDrop, duplicateInTree, findBlockInTree, insertAt, removeBlock } from "@/lib/block-tree";
-import { PreviewModeProvider, previewColumnGrid, usePreviewMode } from "@/lib/preview-mode";
+import { PreviewModeProvider, columnLayout, usePreviewMode } from "@/lib/preview-mode";
 import { cn } from "@/lib/utils";
 import {
   DEFAULT_DESKTOP_ZONES,
@@ -478,6 +478,12 @@ function ColumnsEditor({
   const maxWidths = { sm: "max-w-sm", md: "max-w-2xl", lg: "max-w-4xl", xl: "max-w-6xl", full: "max-w-full" };
   const children = block.children ?? [];
   const maxWidth = block.props.maxWidth ?? "xl";
+  const layout = columnLayout(
+    previewMode,
+    block.props.columns,
+    block.props.stackOnMobile,
+    block.props.columnWidths,
+  );
 
   return (
     <div
@@ -489,16 +495,12 @@ function ColumnsEditor({
       </p>
       <div
         className={cn(
-          "grid mx-auto",
+          "mx-auto",
           maxWidths[maxWidth],
           gaps[block.props.gap],
-          previewColumnGrid(
-            previewMode,
-            block.props.columns,
-            block.props.stackOnMobile,
-            block.props.columnWidths,
-          ),
+          layout.className,
         )}
+        style={layout.style}
       >
         {children.map((col, i) => (
           <div

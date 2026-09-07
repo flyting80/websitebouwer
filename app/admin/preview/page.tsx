@@ -2,7 +2,7 @@
 
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
-import { DevicePreview } from "@/components/admin/DevicePreview";
+import { DevicePreviewFromQuery } from "@/components/admin/DevicePreview";
 import { useSiteStore } from "@/lib/stores/siteStore";
 
 function PreviewInner() {
@@ -13,7 +13,7 @@ function PreviewInner() {
   const fallback = currentSite ? `/${currentSite.slug}/preview` : "/";
   const src = path && path.startsWith("/") ? path : fallback;
 
-  return <DevicePreview src={src} initialDevice={device} />;
+  return <DevicePreviewFromQuery src={src} initialDevice={device} />;
 }
 
 export default function AdminPreviewPage() {

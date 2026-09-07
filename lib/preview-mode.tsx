@@ -45,38 +45,51 @@ export function previewResponsive(
   return cn(mobile, mdPrefixed);
 }
 
-/** Grid-kolommen voor columns / card-grid (met stackOnMobile). */
+/** Equal-width grid classes (static Tailwind — safe for JIT). */
 export function previewGridCols(
   mode: PreviewMode,
   count: 2 | 3 | 4,
   stackOnMobile = true,
 ): string {
-  const desktop = `grid-cols-${count}`;
+  const desktop =
+    count === 2 ? "grid-cols-2" : count === 3 ? "grid-cols-3" : "grid-cols-4";
   if (!stackOnMobile) {
     return previewResponsive(mode, desktop, desktop);
   }
   return previewResponsive(mode, "grid-cols-1", desktop);
 }
 
-/** Columns layout with optional relative widths (e.g. 1fr 2fr). */
-export function previewColumnGrid(
+/** Relative column widths as CSS grid-template-columns value. */
+export function columnTemplate(count: number, widths?: number[]): string {
+  const safe =
+    widths && widths.length === count
+      ? widths.map((w) => Math.max(1, Number(w) || 1))
+      : Array.from({ length: count }, () => 1);
+  return safe.map((w) => `minmax(0, ${w}fr)`).join(" ");
+}
+
+/**
+ * Layout for columns blocks: use inline gridTemplateColumns (Tailwind cannot see
+ * dynamic arbitrary classes like grid-cols-[1fr_2fr]).
+ */
+export function columnLayout(
   mode: PreviewMode,
   count: 2 | 3 | 4,
   stackOnMobile = true,
   widths?: number[],
-): string {
-  const fr = (
-    widths && widths.length === count
-      ? widths.map((w) => Math.max(1, Number(w) || 1))
-      : Array.from({ length: count }, () => 1)
-  )
-    .map((w) => `${w}fr`)
-    .join("_");
-  const desktop = `grid-cols-[${fr}]`;
-  if (!stackOnMobile) {
-    return previewResponsive(mode, desktop, desktop);
+): { className: string; style?: { gridTemplateColumns: string } } {
+  const template = columnTemplate(count, widths);
+  if (mode === "mobile" && stackOnMobile) {
+    return { className: "grid grid-cols-1" };
   }
-  return previewResponsive(mode, "grid-cols-1", desktop);
+  if (mode === "desktop" || !stackOnMobile) {
+    return { className: "grid", style: { gridTemplateColumns: template } };
+  }
+  // live: desktop widths + force single column under md
+  return {
+    className: "grid max-md:![grid-template-columns:minmax(0,1fr)]",
+    style: { gridTemplateColumns: template },
+  };
 }
 
 const HEADING_SIZE: Record<number, { mobile: string; desktop: string }> = {

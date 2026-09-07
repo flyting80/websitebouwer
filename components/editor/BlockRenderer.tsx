@@ -23,16 +23,22 @@ import type {
 } from "@/lib/types/blocks";
 import { PodcastBlockRender } from "./PodcastBlockRender";
 import { NavbarBlockRender } from "./NavbarBlockRender";
-import DOMPurify from "isomorphic-dompurify";
 import { cn } from "@/lib/utils";
 import {
-  previewColumnGrid,
+  columnLayout,
   previewGridCols,
   previewHeadingSize,
   previewResponsive,
   usePreviewMode,
 } from "@/lib/preview-mode";
 import Image from "next/image";
+
+/** Lightweight HTML sanitize — avoids isomorphic-dompurify/jsdom on Vercel. */
+function sanitizeHtml(html: string): string {
+  return html
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "")
+    .replace(/\son\w+\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)/gi, "");
+}
 
 interface Props {
   block: Block;
@@ -174,7 +180,7 @@ function TextRender({ block, theme }: { block: TextBlock; theme: Record<string, 
         block.props.align === "center" ? "text-center" : block.props.align === "right" ? "text-right" : "text-left"
       )}
       style={{ color: theme.colorText, fontFamily: theme.fontBody }}
-      dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(block.props.html) }}
+      dangerouslySetInnerHTML={{ __html: sanitizeHtml(block.props.html) }}
     />
   );
 }
@@ -384,19 +390,21 @@ function ColumnsRender({
   const gaps = { sm: "gap-4", md: "gap-6", lg: "gap-8" };
   const maxWidths = { sm: "max-w-sm", md: "max-w-2xl", lg: "max-w-4xl", xl: "max-w-6xl", full: "max-w-full" };
   const maxWidth = block.props.maxWidth ?? "xl";
+  const layout = columnLayout(
+    previewMode,
+    block.props.columns,
+    block.props.stackOnMobile,
+    block.props.columnWidths,
+  );
   return (
     <div
       className={cn(
-        "grid mx-auto px-6 py-4",
+        "mx-auto px-6 py-4",
         maxWidths[maxWidth],
         gaps[block.props.gap],
-        previewColumnGrid(
-          previewMode,
-          block.props.columns,
-          block.props.stackOnMobile,
-          block.props.columnWidths,
-        ),
+        layout.className,
       )}
+      style={layout.style}
     >
       {(block.children ?? []).map((col) => (
         <div key={col.id} className="min-h-[40px] min-w-0">
