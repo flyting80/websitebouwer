@@ -4,6 +4,7 @@ import { siteSettings } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
+import { dbNow } from "@/lib/db/helpers";
 
 const settingsSchema = z.object({
   siteId: z.string().uuid(),
@@ -44,7 +45,7 @@ export async function PUT(req: NextRequest) {
   const { siteId, ...fields } = parsed.data;
   const [existing] = await db.select().from(siteSettings).where(eq(siteSettings.siteId, siteId));
   if (existing) {
-    await db.update(siteSettings).set({ ...fields, updatedAt: new Date().toISOString() }).where(eq(siteSettings.siteId, siteId));
+    await db.update(siteSettings).set({ ...fields, updatedAt: dbNow() }).where(eq(siteSettings.siteId, siteId));
   } else {
     await db.insert(siteSettings).values({ siteId, ...fields });
   }

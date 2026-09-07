@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { pages } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { eq } from "drizzle-orm";
+import { dbNow } from "@/lib/db/helpers";
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
@@ -16,8 +17,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     liveBlocks: page.draftBlocks,
     liveBlocksMobile: page.draftBlocksMobile,
     isPublished: true,
-    publishedAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
+    publishedAt: dbNow(),
+    updatedAt: dbNow(),
   }).where(eq(pages.id, id));
 
   const [updated] = await db.select().from(pages).where(eq(pages.id, id));
@@ -31,7 +32,7 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
   const { id } = await params;
   await db.update(pages).set({
     isPublished: false,
-    updatedAt: new Date().toISOString(),
+    updatedAt: dbNow(),
   }).where(eq(pages.id, id));
 
   const [updated] = await db.select().from(pages).where(eq(pages.id, id));

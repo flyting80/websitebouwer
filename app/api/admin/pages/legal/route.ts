@@ -3,7 +3,7 @@ import { db } from "@/lib/db";
 import { pages, navItems } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { eq } from "drizzle-orm";
-import { newId } from "@/lib/db/helpers";
+import { dbNow, newId } from "@/lib/db/helpers";
 import { LEGAL_PAGES, legalBlocks } from "@/lib/legal-pages";
 import { sites } from "@/lib/db";
 
@@ -40,7 +40,7 @@ export async function POST(req: NextRequest) {
       draftBlocks: blocks as never,
       liveBlocks: blocks as never,
       isPublished: true,
-      publishedAt: new Date().toISOString(),
+      publishedAt: dbNow(),
       showInNav: false,
       seoTitle: `${spec.title} | ${site.name}`,
       seoDescription: `${spec.title} van ${site.name}.`,

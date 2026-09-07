@@ -123,6 +123,12 @@ export async function uploadFile(
   if (isCloudStorage()) {
     return uploadS3(siteId, filename, bytes, mimeType);
   }
+  // Vercel filesystem is read-only — local uploads only work in development
+  if (process.env.VERCEL) {
+    throw new Error(
+      "Media-upload vereist cloud storage. Zet STORAGE_PROVIDER=s3 en de STORAGE_* variabelen (Supabase Storage S3) in Vercel."
+    );
+  }
   return uploadLocal(siteId, filename, bytes);
 }
 

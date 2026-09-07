@@ -4,6 +4,7 @@ import { siteThemes } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
+import { dbNow } from "@/lib/db/helpers";
 
 const hexColor = z.string().regex(/^#[0-9a-fA-F]{3,8}$/, "Ongeldige kleurcode");
 
@@ -44,7 +45,7 @@ export async function PUT(req: NextRequest) {
 
   const [existing] = await db.select().from(siteThemes).where(eq(siteThemes.siteId, siteId));
   if (existing) {
-    await db.update(siteThemes).set({ ...fields, updatedAt: new Date().toISOString() }).where(eq(siteThemes.siteId, siteId));
+    await db.update(siteThemes).set({ ...fields, updatedAt: dbNow() }).where(eq(siteThemes.siteId, siteId));
   } else {
     await db.insert(siteThemes).values({ siteId, ...fields });
   }

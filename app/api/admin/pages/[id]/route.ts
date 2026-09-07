@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { pages } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { eq } from "drizzle-orm";
+import { dbNow } from "@/lib/db/helpers";
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
@@ -22,10 +23,10 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   const body = await req.json();
 
   const allowed = ["title", "slug", "draftBlocks", "draftBlocksMobile", "seoTitle", "seoDescription", "seoImage", "showInNav", "sortOrder"];
-  const update: Record<string, unknown> = { updatedAt: new Date().toISOString() };
-  const jsonKeys = new Set(["draftBlocks", "draftBlocksMobile"]);
+  const update: Record<string, unknown> = { updatedAt: dbNow() };
   for (const key of allowed) {
-    if (key in body) update[key] = jsonKeys.has(key) ? JSON.stringify(body[key]) : body[key];
+    // Pass JSON fields as objects — Postgres jsonb and SQLite json mode both expect that
+    if (key in body) update[key] = body[key];
   }
 
   await db.update(pages).set(update).where(eq(pages.id, id));

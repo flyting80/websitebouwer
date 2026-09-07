@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { podcastEpisodes } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { eq } from "drizzle-orm";
+import { dbNow } from "@/lib/db/helpers";
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
@@ -22,12 +23,12 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     "title", "slug", "description", "audioUrl", "coverImageUrl",
     "durationSeconds", "status", "publishedAt", "sortOrder",
   ];
-  const update: Record<string, unknown> = { updatedAt: new Date().toISOString() };
+  const update: Record<string, unknown> = { updatedAt: dbNow() };
   for (const key of allowed) {
     if (key in body) update[key] = body[key];
   }
   if (body.status === "published" && !body.publishedAt) {
-    update.publishedAt = new Date().toISOString();
+    update.publishedAt = dbNow();
   }
   await db.update(podcastEpisodes).set(update).where(eq(podcastEpisodes.id, id));
   const [updated] = await db.select().from(podcastEpisodes).where(eq(podcastEpisodes.id, id));

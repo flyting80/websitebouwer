@@ -57,46 +57,52 @@ export async function POST(req: NextRequest) {
   const session = await auth();
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const formData = await req.formData();
-  const file = formData.get("file") as File;
-  const siteId = formData.get("siteId") as string;
-  const folderIdRaw = formData.get("folderId") as string | null;
+  try {
+    const formData = await req.formData();
+    const file = formData.get("file") as File;
+    const siteId = formData.get("siteId") as string;
+    const folderIdRaw = formData.get("folderId") as string | null;
 
-  if (!file || !siteId) return NextResponse.json({ error: "file and siteId required" }, { status: 400 });
+    if (!file || !siteId) return NextResponse.json({ error: "file and siteId required" }, { status: 400 });
 
-  const isImage = IMAGE_TYPES.includes(file.type);
-  const isAudio = AUDIO_TYPES.includes(file.type) || file.name.endsWith(".mp3") || file.name.endsWith(".m4a");
-  if (!isImage && !isAudio) {
-    return NextResponse.json({ error: "Alleen afbeeldingen of audiobestanden (MP3, M4A, WAV, OGG)" }, { status: 400 });
+    const isImage = IMAGE_TYPES.includes(file.type);
+    const isAudio = AUDIO_TYPES.includes(file.type) || file.name.endsWith(".mp3") || file.name.endsWith(".m4a");
+    if (!isImage && !isAudio) {
+      return NextResponse.json({ error: "Alleen afbeeldingen of audiobestanden (MP3, M4A, WAV, OGG)" }, { status: 400 });
+    }
+
+    const maxSize = isAudio ? MAX_AUDIO : MAX_IMAGE;
+    if (file.size > maxSize) {
+      return NextResponse.json({ error: `Bestand te groot (max ${isAudio ? "32MB" : "8MB"})` }, { status: 400 });
+    }
+
+    const ext = ALLOWED_EXTENSIONS[file.type] ?? (isAudio ? "mp3" : "jpg");
+    const filename = `${nanoid()}.${ext}`;
+    const bytes = Buffer.from(await file.arrayBuffer());
+    const mimeType = file.type || (isAudio ? "audio/mpeg" : "image/jpeg");
+
+    const { url, storageKey } = await uploadFile(siteId, filename, bytes, mimeType);
+
+    const mediaId = newId();
+    const folderId = folderIdRaw && folderIdRaw !== "root" ? folderIdRaw : null;
+
+    await db.insert(media).values({
+      id: mediaId,
+      siteId,
+      folderId,
+      filename,
+      originalName: file.name,
+      url,
+      mimeType,
+      size: file.size,
+      alt: file.name.replace(/\.[^.]+$/, ""),
+      storageKey,
+    });
+    const [record] = await db.select().from(media).where(eq(media.id, mediaId));
+    return NextResponse.json(record);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Upload mislukt";
+    const status = message.includes("STORAGE_") ? 503 : 500;
+    return NextResponse.json({ error: message }, { status });
   }
-
-  const maxSize = isAudio ? MAX_AUDIO : MAX_IMAGE;
-  if (file.size > maxSize) {
-    return NextResponse.json({ error: `Bestand te groot (max ${isAudio ? "32MB" : "8MB"})` }, { status: 400 });
-  }
-
-  const ext = ALLOWED_EXTENSIONS[file.type] ?? (isAudio ? "mp3" : "jpg");
-  const filename = `${nanoid()}.${ext}`;
-  const bytes = Buffer.from(await file.arrayBuffer());
-  const mimeType = file.type || (isAudio ? "audio/mpeg" : "image/jpeg");
-
-  const { url, storageKey } = await uploadFile(siteId, filename, bytes, mimeType);
-
-  const mediaId = newId();
-  const folderId = folderIdRaw && folderIdRaw !== "root" ? folderIdRaw : null;
-
-  await db.insert(media).values({
-    id: mediaId,
-    siteId,
-    folderId,
-    filename,
-    originalName: file.name,
-    url,
-    mimeType,
-    size: file.size,
-    alt: file.name.replace(/\.[^.]+$/, ""),
-    storageKey,
-  });
-  const [record] = await db.select().from(media).where(eq(media.id, mediaId));
-  return NextResponse.json(record);
 }

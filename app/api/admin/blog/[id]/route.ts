@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { blogPosts } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { eq } from "drizzle-orm";
+import { dbNow } from "@/lib/db/helpers";
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
@@ -19,12 +20,12 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   const { id } = await params;
   const body = await req.json();
   const allowed = ["title", "slug", "excerpt", "coverImageUrl", "content", "authorName", "status", "publishedAt", "seoTitle", "seoDescription"];
-  const update: Record<string, unknown> = { updatedAt: new Date().toISOString() };
+  const update: Record<string, unknown> = { updatedAt: dbNow() };
   for (const key of allowed) {
-    if (key in body) update[key] = key === "content" ? JSON.stringify(body[key]) : body[key];
+    if (key in body) update[key] = body[key];
   }
   if (body.status === "published" && !body.publishedAt) {
-    update.publishedAt = new Date().toISOString();
+    update.publishedAt = dbNow();
   }
   await db.update(blogPosts).set(update).where(eq(blogPosts.id, id));
   const [updated] = await db.select().from(blogPosts).where(eq(blogPosts.id, id));
