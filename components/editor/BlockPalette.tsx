@@ -29,7 +29,7 @@ export const PALETTE_ITEMS: { type: BlockType; label: string; icon: React.Elemen
   { type: "text", label: "Tekst", icon: AlignLeft, description: "Standaard tekst met opmaak" },
   { type: "image", label: "Afbeelding", icon: ImageIcon, description: "Foto of illustratie" },
   { type: "button", label: "Knop", icon: MousePointer, description: "Call-to-action knop" },
-  { type: "columns", label: "Kolommen", icon: Columns, description: "2, 3 of 4 kolommen" },
+  { type: "columns", label: "Kolommen", icon: Columns, description: "2–4 kolommen met eigen breedtes" },
   { type: "section", label: "Sectie", icon: Layout, description: "Container blok" },
   { type: "gallery", label: "Galerij", icon: Grid, description: "Afbeeldingsraster" },
   { type: "card-grid", label: "Kaarten", icon: Layout, description: "Kaart-raster" },
@@ -39,7 +39,7 @@ export const PALETTE_ITEMS: { type: BlockType; label: string; icon: React.Elemen
   { type: "faq", label: "FAQ", icon: HelpCircle, description: "Veelgestelde vragen" },
   { type: "podcast", label: "Podcast", icon: Mic2, description: "Audio-afleveringen" },
   { type: "divider", label: "Lijn", icon: Minus, description: "Horizontale scheiding" },
-  { type: "spacer", label: "Ruimte", icon: Globe, description: "Witruimte" },
+  { type: "spacer", label: "Ruimte", icon: Globe, description: "Witruimte of gekleurde band" },
 ];
 
 interface Props {
