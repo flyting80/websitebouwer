@@ -15,15 +15,15 @@ import {
   type DragEndEvent,
   type DragStartEvent,
 } from "@dnd-kit/core";
-import { GripVertical, Trash2, Copy, Plus } from "lucide-react";
+import { GripVertical, Trash2, Copy, Plus, PaintBucket } from "lucide-react";
 import { useState, type ReactNode } from "react";
-import type { Block, BlockType, ColumnsBlock, SectionBlock } from "@/lib/types/blocks";
+import type { Block, BlockType, ColumnsBlock, SectionBlock, SpacerBlock } from "@/lib/types/blocks";
 import { createBlock } from "@/lib/types/blocks";
 import { BlockRenderer } from "./BlockRenderer";
 import { PALETTE_ITEMS } from "./BlockPalette";
 import { MobilePhoneFrame } from "./MobilePhoneFrame";
-import { applyDrop, duplicateInTree, findBlockInTree, removeBlock } from "@/lib/block-tree";
-import { PreviewModeProvider, previewGridCols, usePreviewMode } from "@/lib/preview-mode";
+import { applyDrop, duplicateInTree, findBlockInTree, insertAt, removeBlock } from "@/lib/block-tree";
+import { PreviewModeProvider, previewColumnGrid, usePreviewMode } from "@/lib/preview-mode";
 import { cn } from "@/lib/utils";
 import {
   DEFAULT_DESKTOP_ZONES,
@@ -158,6 +158,11 @@ export function EditorCanvas({
     if (result.selectedId) onSelect(result.selectedId);
   }
 
+  function insertCustom(parentId: string | null, index: number, block: Block) {
+    onChange(insertAt(blocks, parentId, index, block));
+    onSelect(block.id);
+  }
+
   const showHeaderPreview =
     headerEnabled &&
     headerPosition !== "in-page" &&
@@ -204,6 +209,7 @@ export function EditorCanvas({
             onDelete={deleteBlock}
             onDuplicate={duplicateBlock}
             onAddAt={addAt}
+            onInsertBlock={insertCustom}
             theme={theme}
             headerPosition={headerPosition}
             headerPreviewBar={injectHeaderInCanvas ? headerPreviewBar : null}
@@ -266,6 +272,7 @@ function CanvasList({
   onDelete,
   onDuplicate,
   onAddAt,
+  onInsertBlock,
   theme,
   headerPosition,
   headerPreviewBar,
@@ -278,6 +285,7 @@ function CanvasList({
   onDelete: (id: string) => void;
   onDuplicate: (id: string) => void;
   onAddAt: (parentId: string | null, index: number, type: BlockType) => void;
+  onInsertBlock: (parentId: string | null, index: number, block: Block) => void;
   theme: Record<string, string>;
   headerPosition?: HeaderPosition;
   headerPreviewBar?: ReactNode;
@@ -287,7 +295,16 @@ function CanvasList({
   const injectHeader = parentId === null && headerPreviewBar && heroIndex !== undefined && heroIndex >= 0;
   return (
     <div>
-      <InsertPoint id={`insert:${key}:0`} onAdd={(type) => onAddAt(parentId, 0, type)} />
+      <InsertPoint
+        id={`insert:${key}:0`}
+        onAdd={(type) => onAddAt(parentId, 0, type)}
+        onInsertBand={(color) => {
+          const spacer = createBlock("spacer") as SpacerBlock;
+          spacer.props = { height: 56, backgroundColor: color };
+          spacer.style = { backgroundColor: color };
+          onInsertBlock(parentId, 0, spacer);
+        }}
+      />
       {items.map((block, index) => (
         <div key={block.id}>
           <CanvasItem
@@ -297,6 +314,7 @@ function CanvasList({
             onDelete={onDelete}
             onDuplicate={onDuplicate}
             onAddAt={onAddAt}
+            onInsertBlock={onInsertBlock}
             theme={theme}
             headerPreviewBar={
               injectHeader && index === heroIndex && headerPosition === "overlay" ? headerPreviewBar : null
@@ -306,6 +324,12 @@ function CanvasList({
           <InsertPoint
             id={`insert:${key}:${index + 1}`}
             onAdd={(type) => onAddAt(parentId, index + 1, type)}
+            onInsertBand={(color) => {
+              const spacer = createBlock("spacer") as SpacerBlock;
+              spacer.props = { height: 56, backgroundColor: color };
+              spacer.style = { backgroundColor: color };
+              onInsertBlock(parentId, index + 1, spacer);
+            }}
           />
         </div>
       ))}
@@ -320,6 +344,7 @@ function CanvasItem({
   onDelete,
   onDuplicate,
   onAddAt,
+  onInsertBlock,
   theme,
   headerPreviewBar,
 }: {
@@ -329,6 +354,7 @@ function CanvasItem({
   onDelete: (id: string) => void;
   onDuplicate: (id: string) => void;
   onAddAt: (parentId: string | null, index: number, type: BlockType) => void;
+  onInsertBlock: (parentId: string | null, index: number, block: Block) => void;
   theme: Record<string, string>;
   headerPreviewBar?: ReactNode;
 }) {
@@ -390,6 +416,7 @@ function CanvasItem({
           onDelete={onDelete}
           onDuplicate={onDuplicate}
           onAddAt={onAddAt}
+          onInsertBlock={onInsertBlock}
           theme={theme}
         />
       ) : block.type === "section" ? (
@@ -400,6 +427,7 @@ function CanvasItem({
           onDelete={onDelete}
           onDuplicate={onDuplicate}
           onAddAt={onAddAt}
+          onInsertBlock={onInsertBlock}
           theme={theme}
         />
       ) : headerPreviewBar ? (
@@ -433,6 +461,7 @@ function ColumnsEditor({
   onDelete,
   onDuplicate,
   onAddAt,
+  onInsertBlock,
   theme,
 }: {
   block: ColumnsBlock;
@@ -441,34 +470,50 @@ function ColumnsEditor({
   onDelete: (id: string) => void;
   onDuplicate: (id: string) => void;
   onAddAt: (parentId: string | null, index: number, type: BlockType) => void;
+  onInsertBlock: (parentId: string | null, index: number, block: Block) => void;
   theme: Record<string, string>;
 }) {
   const previewMode = usePreviewMode();
   const gaps = { sm: "gap-4", md: "gap-6", lg: "gap-8" };
+  const maxWidths = { sm: "max-w-sm", md: "max-w-2xl", lg: "max-w-4xl", xl: "max-w-6xl", full: "max-w-full" };
   const children = block.children ?? [];
+  const maxWidth = block.props.maxWidth ?? "xl";
 
   return (
-    <div className="px-4 py-3">
+    <div
+      className="px-4 py-3"
+      style={block.style?.backgroundColor ? { backgroundColor: block.style.backgroundColor } : undefined}
+    >
       <p className="text-[11px] font-semibold text-amber-800 mb-2">
         Kolommen · sleep blokken naar een kolom
       </p>
       <div
         className={cn(
-          "grid",
+          "grid mx-auto",
+          maxWidths[maxWidth],
           gaps[block.props.gap],
-          previewGridCols(previewMode, block.props.columns, block.props.stackOnMobile),
+          previewColumnGrid(
+            previewMode,
+            block.props.columns,
+            block.props.stackOnMobile,
+            block.props.columnWidths,
+          ),
         )}
       >
         {children.map((col, i) => (
           <div
             key={col.id}
-            className="min-h-[140px] rounded-xl border-2 border-dashed border-amber-200 bg-amber-50/40 p-1"
+            className="min-h-[140px] min-w-0 rounded-xl border-2 border-dashed border-amber-200 bg-amber-50/40 p-1"
+            style={col.style?.backgroundColor ? { backgroundColor: col.style.backgroundColor } : undefined}
             onClick={(e) => {
               e.stopPropagation();
               onSelect(col.id);
             }}
           >
-            <p className="text-[10px] uppercase tracking-wide text-amber-700 px-2 py-1">Kolom {i + 1}</p>
+            <p className="text-[10px] uppercase tracking-wide text-amber-700 px-2 py-1">
+              Kolom {i + 1}
+              {block.props.columnWidths?.[i] ? ` · ${block.props.columnWidths[i]}` : ""}
+            </p>
             <CanvasList
               parentId={col.id}
               items={col.children ?? []}
@@ -477,6 +522,7 @@ function ColumnsEditor({
               onDelete={onDelete}
               onDuplicate={onDuplicate}
               onAddAt={onAddAt}
+              onInsertBlock={onInsertBlock}
               theme={theme}
             />
           </div>
@@ -493,6 +539,7 @@ function SectionEditor({
   onDelete,
   onDuplicate,
   onAddAt,
+  onInsertBlock,
   theme,
 }: {
   block: SectionBlock;
@@ -501,6 +548,7 @@ function SectionEditor({
   onDelete: (id: string) => void;
   onDuplicate: (id: string) => void;
   onAddAt: (parentId: string | null, index: number, type: BlockType) => void;
+  onInsertBlock: (parentId: string | null, index: number, block: Block) => void;
   theme: Record<string, string>;
 }) {
   const maxWidths = { sm: "max-w-sm", md: "max-w-2xl", lg: "max-w-4xl", xl: "max-w-6xl", full: "max-w-full" };
@@ -518,16 +566,27 @@ function SectionEditor({
         onDelete={onDelete}
         onDuplicate={onDuplicate}
         onAddAt={onAddAt}
+        onInsertBlock={onInsertBlock}
         theme={theme}
       />
     </div>
   );
 }
 
-const QUICK_ADDS: BlockType[] = ["heading", "text", "image", "button", "divider", "hero", "columns"];
+const QUICK_ADDS: BlockType[] = ["heading", "text", "image", "button", "divider", "spacer", "hero", "columns"];
 
-function InsertPoint({ id, onAdd }: { id: string; onAdd: (type: BlockType) => void }) {
+function InsertPoint({
+  id,
+  onAdd,
+  onInsertBand,
+}: {
+  id: string;
+  onAdd: (type: BlockType) => void;
+  onInsertBand: (color: string) => void;
+}) {
   const [open, setOpen] = useState(false);
+  const [colorOpen, setColorOpen] = useState(false);
+  const [bandColor, setBandColor] = useState("#e8f0fe");
   const { setNodeRef, isOver } = useDroppable({ id });
   const { active } = useDndContext();
   const dragging = Boolean(active);
@@ -537,7 +596,7 @@ function InsertPoint({ id, onAdd }: { id: string; onAdd: (type: BlockType) => vo
       ref={setNodeRef}
       className={cn(
         "relative z-10 flex justify-center items-center transition-all",
-        dragging ? "h-10 my-0.5" : "h-5"
+        dragging ? "h-10 my-0.5" : "h-6"
       )}
     >
       {dragging ? (
@@ -552,17 +611,30 @@ function InsertPoint({ id, onAdd }: { id: string; onAdd: (type: BlockType) => vo
           </p>
         </div>
       ) : (
-        <div className="relative">
+        <div className="relative flex items-center gap-1">
           <button
             type="button"
             onClick={(e) => {
               e.stopPropagation();
               setOpen((v) => !v);
+              setColorOpen(false);
             }}
             className="w-6 h-6 bg-amber-500 hover:bg-amber-600 text-white rounded-full flex items-center justify-center shadow opacity-50 hover:opacity-100"
             title="Blok invoegen"
           >
             <Plus size={12} />
+          </button>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              setColorOpen((v) => !v);
+              setOpen(false);
+            }}
+            className="w-6 h-6 bg-white border border-stone-200 hover:border-amber-400 text-stone-500 hover:text-amber-700 rounded-full flex items-center justify-center shadow opacity-40 hover:opacity-100"
+            title="Gekleurde ruimte invoegen"
+          >
+            <PaintBucket size={11} />
           </button>
           {open && (
             <div className="absolute top-8 left-1/2 -translate-x-1/2 bg-white border border-stone-200 rounded-xl shadow-xl p-2 grid grid-cols-3 gap-1 w-52 z-30">
@@ -580,6 +652,28 @@ function InsertPoint({ id, onAdd }: { id: string; onAdd: (type: BlockType) => vo
                   {type}
                 </button>
               ))}
+            </div>
+          )}
+          {colorOpen && (
+            <div className="absolute top-8 left-1/2 -translate-x-1/2 bg-white border border-stone-200 rounded-xl shadow-xl p-3 w-48 z-30 space-y-2">
+              <p className="text-[11px] font-medium text-stone-600">Achtergrond tussen blokken</p>
+              <input
+                type="color"
+                value={bandColor}
+                onChange={(e) => setBandColor(e.target.value)}
+                className="h-8 w-full rounded cursor-pointer border border-stone-200"
+              />
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onInsertBand(bandColor);
+                  setColorOpen(false);
+                }}
+                className="w-full text-xs py-1.5 rounded-lg bg-amber-500 text-white hover:bg-amber-600"
+              >
+                Ruimte met deze kleur
+              </button>
             </div>
           )}
         </div>

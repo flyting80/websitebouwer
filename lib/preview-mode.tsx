@@ -58,6 +58,27 @@ export function previewGridCols(
   return previewResponsive(mode, "grid-cols-1", desktop);
 }
 
+/** Columns layout with optional relative widths (e.g. 1fr 2fr). */
+export function previewColumnGrid(
+  mode: PreviewMode,
+  count: 2 | 3 | 4,
+  stackOnMobile = true,
+  widths?: number[],
+): string {
+  const fr = (
+    widths && widths.length === count
+      ? widths.map((w) => Math.max(1, Number(w) || 1))
+      : Array.from({ length: count }, () => 1)
+  )
+    .map((w) => `${w}fr`)
+    .join("_");
+  const desktop = `grid-cols-[${fr}]`;
+  if (!stackOnMobile) {
+    return previewResponsive(mode, desktop, desktop);
+  }
+  return previewResponsive(mode, "grid-cols-1", desktop);
+}
+
 const HEADING_SIZE: Record<number, { mobile: string; desktop: string }> = {
   1: { mobile: "text-4xl leading-tight", desktop: "text-5xl leading-tight" },
   2: { mobile: "text-3xl leading-snug", desktop: "text-4xl leading-snug" },

@@ -63,7 +63,9 @@ export function PropertiesPanel({ block, onChange, onClose, seo, onSeoChange }: 
         {block.type === "image" && <ImageProps block={block as ImageBlock} update={update} />}
         {block.type === "button" && <ButtonProps block={block as ButtonBlock} update={update} />}
         {block.type === "divider" && <DividerProps block={block as DividerBlock} update={update} />}
-        {block.type === "spacer" && <SpacerProps block={block as SpacerBlock} update={update} />}
+        {block.type === "spacer" && (
+          <SpacerProps block={block as SpacerBlock} update={update} updateStyle={updateStyle} />
+        )}
         {block.type === "hero" && <HeroProps block={block as HeroBlock} update={update} />}
         {block.type === "columns" && <ColumnsProps block={block as ColumnsBlock} onChange={onChange} />}
         {block.type === "section" && <SectionProps block={block as SectionBlock} update={update} />}
@@ -79,7 +81,7 @@ export function PropertiesPanel({ block, onChange, onClose, seo, onSeoChange }: 
         {/* Universal style overrides */}
         <div>
           <p className="text-xs font-semibold text-stone-400 uppercase tracking-wider mb-2">Opmaak</p>
-          <label className="block text-xs text-stone-500 mb-0.5">Achtergrondkleur</label>
+          <label className="block text-xs text-stone-500 mb-0.5">Achtergrondkleur (blok)</label>
           <input
             type="color"
             value={block.style?.backgroundColor ?? "#ffffff"}
@@ -90,8 +92,11 @@ export function PropertiesPanel({ block, onChange, onClose, seo, onSeoChange }: 
             onClick={() => updateStyle({ backgroundColor: undefined })}
             className="text-xs text-stone-400 hover:text-stone-600 mt-1"
           >
-            Standaard herstellen
+            Standaard herstellen (site-achtergrond)
           </button>
+          <p className="text-[11px] text-stone-400 mt-2">
+            Wijkt af van de sitekleur én van objectkleuren erin. Werkt ook op secties, kolommen en ruimte-blokken.
+          </p>
         </div>
 
         {seo && onSeoChange && (
@@ -266,16 +271,66 @@ function DividerProps({ block, update }: { block: DividerBlock; update: (p: Part
   );
 }
 
-function SpacerProps({ block, update }: { block: SpacerBlock; update: (p: Partial<SpacerBlock["props"]>) => void }) {
+function SpacerProps({
+  block,
+  update,
+  updateStyle,
+}: {
+  block: SpacerBlock;
+  update: (p: Partial<SpacerBlock["props"]>) => void;
+  updateStyle: (s: Partial<NonNullable<Block["style"]>>) => void;
+}) {
+  const bg = block.props.backgroundColor ?? block.style?.backgroundColor ?? "";
   return (
-    <Field label="Hoogte (px)">
-      <input type="range" min={8} max={200} step={4} value={block.props.height} onChange={(e) => update({ height: Number(e.target.value) })} className="w-full" />
-      <p className="text-xs text-stone-400 text-right">{block.props.height}px</p>
-    </Field>
+    <>
+      <Field label="Hoogte (px)">
+        <input
+          type="range"
+          min={8}
+          max={240}
+          step={4}
+          value={block.props.height}
+          onChange={(e) => update({ height: Number(e.target.value) })}
+          className="w-full"
+        />
+        <p className="text-xs text-stone-400 text-right">{block.props.height}px</p>
+      </Field>
+      <Field label="Achtergrondkleur van deze ruimte">
+        <input
+          type="color"
+          value={bg || "#ffffff"}
+          onChange={(e) => {
+            update({ backgroundColor: e.target.value });
+            updateStyle({ backgroundColor: e.target.value });
+          }}
+          className="h-8 w-full rounded cursor-pointer border border-stone-200"
+        />
+        <button
+          type="button"
+          onClick={() => {
+            update({ backgroundColor: undefined });
+            updateStyle({ backgroundColor: undefined });
+          }}
+          className="text-xs text-stone-400 hover:text-stone-600 mt-1"
+        >
+          Geen eigen kleur (site-achtergrond)
+        </button>
+      </Field>
+    </>
   );
 }
 
 function ColumnsProps({ block, onChange }: { block: ColumnsBlock; onChange: (updated: Block) => void }) {
+  const count = block.props.columns;
+  const widths =
+    block.props.columnWidths?.length === count
+      ? block.props.columnWidths
+      : Array.from({ length: count }, () => 1);
+
+  function setWidths(next: number[]) {
+    onChange({ ...block, props: { ...block.props, columnWidths: next } });
+  }
+
   return (
     <>
       <Field label="Aantal kolommen">
@@ -289,6 +344,58 @@ function ColumnsProps({ block, onChange }: { block: ColumnsBlock; onChange: (upd
           ]}
         />
       </Field>
+      <Field label="Breedte in de pagina">
+        <Select
+          value={block.props.maxWidth ?? "xl"}
+          onChange={(v) =>
+            onChange({
+              ...block,
+              props: { ...block.props, maxWidth: v as NonNullable<ColumnsBlock["props"]["maxWidth"]> },
+            })
+          }
+          options={[
+            { value: "sm", label: "Smal" },
+            { value: "md", label: "Middel" },
+            { value: "lg", label: "Breed" },
+            { value: "xl", label: "Extra breed" },
+            { value: "full", label: "Volledig" },
+          ]}
+        />
+      </Field>
+      <div>
+        <p className="text-xs font-medium text-stone-600 mb-1">Kolombreedtes (verhouding)</p>
+        <p className="text-[11px] text-stone-400 mb-2">
+          Bijv. 1 + 2 = één derde / twee derde. Totaal: {widths.reduce((a, b) => a + b, 0)}
+        </p>
+        <div className="space-y-2">
+          {widths.map((w, i) => (
+            <div key={i} className="flex items-center gap-2">
+              <span className="text-xs text-stone-500 w-14 shrink-0">Kolom {i + 1}</span>
+              <input
+                type="range"
+                min={1}
+                max={6}
+                step={1}
+                value={w}
+                onChange={(e) => {
+                  const next = [...widths];
+                  next[i] = Number(e.target.value);
+                  setWidths(next);
+                }}
+                className="flex-1"
+              />
+              <span className="text-xs text-stone-600 w-6 text-right">{w}</span>
+            </div>
+          ))}
+        </div>
+        <button
+          type="button"
+          className="text-xs text-amber-700 hover:text-amber-900 mt-2"
+          onClick={() => setWidths(Array.from({ length: count }, () => 1))}
+        >
+          Gelijke breedtes
+        </button>
+      </div>
       <Field label="Ruimte ertussen">
         <Select
           value={block.props.gap}
@@ -310,7 +417,7 @@ function ColumnsProps({ block, onChange }: { block: ColumnsBlock; onChange: (upd
         <label htmlFor="stackmobile" className="text-sm text-stone-600">Op telefoon onder elkaar</label>
       </div>
       <p className="text-xs text-stone-400">
-        Sleep een kop, tekst of afbeelding vanuit de lijst links naar Kolom 1 of Kolom 2. Klik daarna op die inhoud om hem te bewerken.
+        Selecteer een kolom (sectie erin) om per kolom een eigen achtergrondkleur te zetten onder Opmaak.
       </p>
     </>
   );

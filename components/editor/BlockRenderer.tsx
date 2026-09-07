@@ -26,6 +26,7 @@ import { NavbarBlockRender } from "./NavbarBlockRender";
 import DOMPurify from "isomorphic-dompurify";
 import { cn } from "@/lib/utils";
 import {
+  previewColumnGrid,
   previewGridCols,
   previewHeadingSize,
   previewResponsive,
@@ -103,7 +104,31 @@ export function BlockRenderer({ block, theme, isEditing, siteId, siteSlug, selec
   }
 
   const isContainer = block.type === "section" || block.type === "columns";
-  if (!isEditing || !onSelectBlock || isContainer) return inner;
+  let out = inner;
+
+  // Apply per-block style (background / text / vertical padding) on all blocks
+  const st = block.style;
+  const bg =
+    st?.backgroundColor ??
+    (block.type === "spacer" ? (block as SpacerBlock).props.backgroundColor : undefined);
+  // Spacer paints its own band; avoid double wrappers for spacer-only bg
+  const wrapSpacer = block.type === "spacer" && !st?.textColor && !st?.paddingTop && !st?.paddingBottom;
+  if (!wrapSpacer && (bg || st?.textColor || st?.paddingTop || st?.paddingBottom)) {
+    out = (
+      <div
+        style={{
+          backgroundColor: block.type === "spacer" ? undefined : bg,
+          color: st?.textColor,
+          paddingTop: st?.paddingTop,
+          paddingBottom: st?.paddingBottom,
+        }}
+      >
+        {inner}
+      </div>
+    );
+  }
+
+  if (!isEditing || !onSelectBlock || isContainer) return out;
 
   return (
     <div
@@ -113,7 +138,7 @@ export function BlockRenderer({ block, theme, isEditing, siteId, siteSlug, selec
         onSelectBlock(block.id);
       }}
     >
-      {inner}
+      {out}
     </div>
   );
 }
@@ -222,7 +247,17 @@ function DividerRender({ block }: { block: DividerBlock }) {
 
 // ─── Spacer ──────────────────────────────────────────────────────────────────
 function SpacerRender({ block }: { block: SpacerBlock }) {
-  return <div style={{ height: block.props.height }} />;
+  const bg = block.props.backgroundColor ?? block.style?.backgroundColor;
+  return (
+    <div
+      style={{
+        height: block.props.height,
+        backgroundColor: bg,
+        width: "100%",
+      }}
+      aria-hidden
+    />
+  );
 }
 
 // ─── Hero ────────────────────────────────────────────────────────────────────
@@ -306,10 +341,7 @@ function SectionRender({
   const maxWidths = { sm: "max-w-sm", md: "max-w-2xl", lg: "max-w-4xl", xl: "max-w-6xl", full: "max-w-full" };
   const pads = { none: "", sm: "px-4", md: "px-6", lg: "px-8" };
   return (
-    <div
-      className={cn("mx-auto py-4", maxWidths[block.props.maxWidth], pads[block.props.paddingX])}
-      style={block.style ? { backgroundColor: block.style.backgroundColor } : undefined}
-    >
+    <div className={cn("mx-auto py-4", maxWidths[block.props.maxWidth], pads[block.props.paddingX])}>
       {block.children?.map((child) => (
         <BlockRenderer
           key={child.id}
@@ -350,16 +382,24 @@ function ColumnsRender({
 }) {
   const previewMode = usePreviewMode();
   const gaps = { sm: "gap-4", md: "gap-6", lg: "gap-8" };
+  const maxWidths = { sm: "max-w-sm", md: "max-w-2xl", lg: "max-w-4xl", xl: "max-w-6xl", full: "max-w-full" };
+  const maxWidth = block.props.maxWidth ?? "xl";
   return (
     <div
       className={cn(
-        "grid px-6 py-4",
+        "grid mx-auto px-6 py-4",
+        maxWidths[maxWidth],
         gaps[block.props.gap],
-        previewGridCols(previewMode, block.props.columns, block.props.stackOnMobile),
+        previewColumnGrid(
+          previewMode,
+          block.props.columns,
+          block.props.stackOnMobile,
+          block.props.columnWidths,
+        ),
       )}
     >
       {(block.children ?? []).map((col) => (
-        <div key={col.id} className="min-h-[40px]">
+        <div key={col.id} className="min-h-[40px] min-w-0">
           <BlockRenderer
             block={col}
             theme={theme}

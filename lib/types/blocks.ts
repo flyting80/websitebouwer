@@ -83,7 +83,11 @@ export interface DividerBlock extends BaseBlock {
 
 export interface SpacerBlock extends BaseBlock {
   type: "spacer";
-  props: { height: number }; // px
+  props: {
+    height: number; // px
+    /** Optional full-bleed band color (also settable via style.backgroundColor) */
+    backgroundColor?: string;
+  };
 }
 
 export interface HeroBlock extends BaseBlock {
@@ -115,6 +119,10 @@ export interface ColumnsBlock extends BaseBlock {
     columns: 2 | 3 | 4;
     gap: "sm" | "md" | "lg";
     stackOnMobile: boolean;
+    /** Overall width of the columns block within the page */
+    maxWidth?: "sm" | "md" | "lg" | "xl" | "full";
+    /** Relative widths per column (e.g. [1, 2] = 1/3 + 2/3). Defaults to equal. */
+    columnWidths?: number[];
   };
   children: Block[]; // first N = column contents (each a section-like wrapper)
 }
@@ -233,16 +241,27 @@ export function createBlock(type: BlockType): Block {
     case "divider":
       return { id, type, props: { style: "line" } } as DividerBlock;
     case "spacer":
-      return { id, type, props: { height: 40 } } as SpacerBlock;
+      return { id, type, props: { height: 48 } } as SpacerBlock;
     case "hero":
       return { id, type, props: { title: "Welkom op onze website", subtitle: "Omschrijf hier waar je voor staat.", backgroundOverlay: 40, align: "center", minHeight: 500 } } as HeroBlock;
     case "section":
       return { id, type, props: { maxWidth: "lg", paddingX: "md" }, children: [] } as SectionBlock;
     case "columns":
-      return { id, type, props: { columns: 2, gap: "md", stackOnMobile: true }, children: [
-        { id: nanoid(), type: "section", props: { maxWidth: "full", paddingX: "none" }, children: [] } as SectionBlock,
-        { id: nanoid(), type: "section", props: { maxWidth: "full", paddingX: "none" }, children: [] } as SectionBlock,
-      ] } as ColumnsBlock;
+      return {
+        id,
+        type,
+        props: {
+          columns: 2,
+          gap: "md",
+          stackOnMobile: true,
+          maxWidth: "xl",
+          columnWidths: [1, 1],
+        },
+        children: [
+          { id: nanoid(), type: "section", props: { maxWidth: "full", paddingX: "none" }, children: [] } as SectionBlock,
+          { id: nanoid(), type: "section", props: { maxWidth: "full", paddingX: "none" }, children: [] } as SectionBlock,
+        ],
+      } as ColumnsBlock;
     case "gallery":
       return { id, type, props: { images: [], columns: 3, gap: "md", aspectRatio: "square" } } as GalleryBlock;
     case "contact-form":

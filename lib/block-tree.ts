@@ -151,9 +151,13 @@ export function setColumnCount(block: Block, count: 2 | 3 | 4): Block {
     for (const col of extra) merged.push(...(col.children ?? []));
     children[count - 1] = { ...last, children: merged };
   }
+  const prevWidths = (block.props as { columnWidths?: number[] }).columnWidths;
+  const columnWidths = Array.from({ length: count }, (_, i) =>
+    prevWidths?.[i] && prevWidths[i] > 0 ? prevWidths[i] : 1
+  );
   return {
     ...block,
-    props: { ...block.props, columns: count },
+    props: { ...block.props, columns: count, columnWidths },
     children,
   } as Block;
 }
