@@ -24,6 +24,38 @@ function resolveMode(): "local" | "postgres" {
   return "postgres";
 }
 
+function activeSchema(): any {
+  // Must match getDb() dialect: sqlite JSON columns JSON.parse strings;
+  // postgres jsonb already returns objects — using sqlite table defs on postgres
+  // caused: Unexpected token 'o', "[object Obj"... is not valid JSON
+  return resolveMode() === "postgres" ? require("./schema") : require("./schema-sqlite");
+}
+
+function bindTable(name: string): any {
+  return new Proxy(
+    {},
+    {
+      get(_target, prop) {
+        const table = activeSchema()[name];
+        const value = table[prop];
+        return typeof value === "function" ? value.bind(table) : value;
+      },
+      ownKeys() {
+        return Reflect.ownKeys(activeSchema()[name]);
+      },
+      getOwnPropertyDescriptor(_target, prop) {
+        return Object.getOwnPropertyDescriptor(activeSchema()[name], prop);
+      },
+      has(_target, prop) {
+        return prop in activeSchema()[name];
+      },
+      getPrototypeOf() {
+        return Object.getPrototypeOf(activeSchema()[name]);
+      },
+    }
+  );
+}
+
 export function getDb(): any {
   // Always resolve from process.env at call-time (never bake mode at module load /
   // build time — that caused SQLite on Vercel when DATABASE_URL was only set at runtime).
@@ -71,4 +103,34 @@ export let db: any = new Proxy({} as any, {
   },
 });
 
-export * from "./schema-sqlite";
+// Runtime-bound tables (sqlite locally, postgres on Vercel)
+export const sites = bindTable("sites");
+export const siteThemes = bindTable("siteThemes");
+export const users = bindTable("users");
+export const sessions = bindTable("sessions");
+export const verificationTokens = bindTable("verificationTokens");
+export const accounts = bindTable("accounts");
+export const pages = bindTable("pages");
+export const mediaFolders = bindTable("mediaFolders");
+export const media = bindTable("media");
+export const podcastEpisodes = bindTable("podcastEpisodes");
+export const blogPosts = bindTable("blogPosts");
+export const blogCategories = bindTable("blogCategories");
+export const blogPostCategories = bindTable("blogPostCategories");
+export const contactSubmissions = bindTable("contactSubmissions");
+export const navItems = bindTable("navItems");
+export const siteSettings = bindTable("siteSettings");
+
+export type {
+  Site,
+  Page,
+  MediaFolder,
+  Media,
+  PodcastEpisode,
+  BlogPost,
+  BlogCategory,
+  ContactSubmission,
+  NavItem,
+  SiteTheme,
+  SiteSettings,
+} from "./schema-sqlite";
