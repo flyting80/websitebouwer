@@ -61,22 +61,28 @@ export function MediaPicker({ label = "Afbeelding", url, onSelect, onClear, acce
   async function upload(list: FileList) {
     if (!currentSite) return;
     setUploading(true);
-    for (const file of Array.from(list)) {
-      const form = new FormData();
-      form.append("file", file);
-      form.append("siteId", currentSite.id);
-      if (browseFolderId) form.append("folderId", browseFolderId);
-      const res = await fetch("/api/admin/media", { method: "POST", body: form });
-      if (res.ok) {
-        const media = await res.json();
+    try {
+      for (const file of Array.from(list)) {
+        const form = new FormData();
+        form.append("file", file);
+        form.append("siteId", currentSite.id);
+        if (browseFolderId) form.append("folderId", browseFolderId);
+        const res = await fetch("/api/admin/media", { method: "POST", body: form });
+        const body = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          alert(body.error || `Upload mislukt (${res.status})`);
+          break;
+        }
+        const media = body;
         if (acceptAudio && !isAudio(media)) continue;
         if (!acceptAudio && isAudio(media)) continue;
         setFiles((f) => [media, ...f]);
         onSelect(media);
         setOpen(false);
       }
+    } finally {
+      setUploading(false);
     }
-    setUploading(false);
   }
 
   const accept = acceptAudio

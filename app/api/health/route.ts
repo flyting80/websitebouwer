@@ -43,5 +43,16 @@ export async function GET() {
       hasAdminEmail: Boolean(process.env.ADMIN_EMAIL?.trim()),
       hasAdminPassword: Boolean(process.env.ADMIN_PASSWORD?.trim()),
     },
+    storage: {
+      provider: process.env.STORAGE_PROVIDER || "auto",
+      hasSupabaseUrl: Boolean(
+        (process.env.NEXT_PUBLIC_SUPABASE_URL ?? process.env.SUPABASE_URL ?? "").trim()
+      ),
+      hasServiceRoleKey: Boolean(
+        (process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.SUPABASE_SECRET_KEY ?? "").trim()
+      ),
+      bucket: (process.env.STORAGE_BUCKET ?? "media").trim() || "media",
+      isS3: process.env.STORAGE_PROVIDER === "s3",
+    },
   });
 }

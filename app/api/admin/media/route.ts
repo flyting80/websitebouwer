@@ -102,7 +102,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(record);
   } catch (err) {
     const message = err instanceof Error ? err.message : "Upload mislukt";
-    const status = message.includes("STORAGE_") ? 503 : 500;
+    const status =
+      /STORAGE_|Supabase Storage|service_role/i.test(message) ? 503 : 500;
     return NextResponse.json({ error: message }, { status });
   }
 }
