@@ -112,14 +112,25 @@ export function BlockRenderer({ block, theme, isEditing, siteId, siteSlug, selec
   const isContainer = block.type === "section" || block.type === "columns";
   let out = inner;
 
-  // Apply per-block style (background / text / vertical padding) on all blocks
+  // Apply per-block style (background / text / vertical padding / corner radius) on all blocks
   const st = block.style;
   const bg =
     st?.backgroundColor ??
     (block.type === "spacer" ? (block as SpacerBlock).props.backgroundColor : undefined);
+  const radiusTop = st?.borderRadiusTop ?? 0;
+  const radiusBottom = st?.borderRadiusBottom ?? 0;
+  const hasRadius = radiusTop > 0 || radiusBottom > 0;
   // Spacer paints its own band; avoid double wrappers for spacer-only bg
-  const wrapSpacer = block.type === "spacer" && !st?.textColor && !st?.paddingTop && !st?.paddingBottom;
-  if (!wrapSpacer && (bg || st?.textColor || st?.paddingTop || st?.paddingBottom)) {
+  const wrapSpacer =
+    block.type === "spacer" &&
+    !st?.textColor &&
+    !st?.paddingTop &&
+    !st?.paddingBottom &&
+    !hasRadius;
+  if (
+    !wrapSpacer &&
+    (bg || st?.textColor || st?.paddingTop || st?.paddingBottom || hasRadius)
+  ) {
     out = (
       <div
         style={{
@@ -127,6 +138,11 @@ export function BlockRenderer({ block, theme, isEditing, siteId, siteSlug, selec
           color: st?.textColor,
           paddingTop: st?.paddingTop,
           paddingBottom: st?.paddingBottom,
+          borderTopLeftRadius: radiusTop || undefined,
+          borderTopRightRadius: radiusTop || undefined,
+          borderBottomLeftRadius: radiusBottom || undefined,
+          borderBottomRightRadius: radiusBottom || undefined,
+          overflow: hasRadius ? "hidden" : undefined,
         }}
       >
         {inner}
@@ -179,7 +195,11 @@ function TextRender({ block, theme }: { block: TextBlock; theme: Record<string, 
         "px-6 py-3 prose max-w-none",
         block.props.align === "center" ? "text-center" : block.props.align === "right" ? "text-right" : "text-left"
       )}
-      style={{ color: theme.colorText, fontFamily: theme.fontBody }}
+      style={{
+        color: theme.colorText,
+        fontFamily: theme.fontBody,
+        ["--font-heading" as string]: theme.fontHeading,
+      }}
       dangerouslySetInnerHTML={{ __html: sanitizeHtml(block.props.html) }}
     />
   );
@@ -248,18 +268,24 @@ function DividerRender({ block }: { block: DividerBlock }) {
       {[0, 1, 2].map(i => <span key={i} className="w-1.5 h-1.5 rounded-full bg-stone-300" />)}
     </div>
   );
-  return <hr className="mx-8 my-4 border-stone-200" />;
+  return <hr className="w-full my-0 border-stone-200" />;
 }
 
 // ─── Spacer ──────────────────────────────────────────────────────────────────
 function SpacerRender({ block }: { block: SpacerBlock }) {
   const bg = block.props.backgroundColor ?? block.style?.backgroundColor;
+  const radiusTop = block.style?.borderRadiusTop ?? 0;
+  const radiusBottom = block.style?.borderRadiusBottom ?? 0;
   return (
     <div
       style={{
         height: block.props.height,
         backgroundColor: bg,
         width: "100%",
+        borderTopLeftRadius: radiusTop || undefined,
+        borderTopRightRadius: radiusTop || undefined,
+        borderBottomLeftRadius: radiusBottom || undefined,
+        borderBottomRightRadius: radiusBottom || undefined,
       }}
       aria-hidden
     />

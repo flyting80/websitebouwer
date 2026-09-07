@@ -38,6 +38,15 @@ const SIZES = [
   { value: "40px", label: "40" },
 ];
 
+const BLOCK_STYLES = [
+  { value: "p", label: "Tekst" },
+  { value: "h1", label: "Kop 1" },
+  { value: "h2", label: "Kop 2" },
+  { value: "h3", label: "Kop 3" },
+  { value: "h4", label: "Kop 4" },
+  { value: "h5", label: "Kop 5" },
+];
+
 interface Props {
   value: string;
   onChange: (html: string) => void;
@@ -90,6 +99,15 @@ export function RichTextEditor({ value, onChange }: Props) {
     wrapSelection({ fontWeight: weight });
   }
 
+  function applyBlockStyle(tag: string) {
+    ref.current?.focus();
+    document.execCommand("styleWithCSS", false, "true");
+    // Chrome/Safari: "h2"; Firefox: "<h2>"
+    const ok = document.execCommand("formatBlock", false, tag);
+    if (!ok) document.execCommand("formatBlock", false, `<${tag}>`);
+    emit();
+  }
+
   function wrapSelection(styles: Record<string, string>) {
     const sel = window.getSelection();
     if (!sel || sel.rangeCount === 0 || sel.isCollapsed) return;
@@ -116,6 +134,26 @@ export function RichTextEditor({ value, onChange }: Props) {
   return (
     <div className="border border-stone-300 rounded-lg overflow-hidden bg-white">
       <div className="flex flex-wrap gap-0.5 p-1.5 border-b border-stone-200 bg-stone-50">
+        <select
+          className="h-7 text-[11px] border border-stone-200 rounded px-1 bg-white w-[72px]"
+          defaultValue=""
+          title="Kop of tekst"
+          onMouseDown={(e) => e.preventDefault()}
+          onChange={(e) => {
+            if (e.target.value) applyBlockStyle(e.target.value);
+            e.target.value = "";
+          }}
+        >
+          <option value="" disabled>
+            Stijl
+          </option>
+          {BLOCK_STYLES.map((b) => (
+            <option key={b.value} value={b.value}>
+              {b.label}
+            </option>
+          ))}
+        </select>
+        <Sep />
         <ToolBtn title="Vet" onClick={() => cmd("bold")}><Bold size={13} /></ToolBtn>
         <ToolBtn title="Schuin" onClick={() => cmd("italic")}><Italic size={13} /></ToolBtn>
         <ToolBtn title="Onderstrepen" onClick={() => cmd("underline")}><Underline size={13} /></ToolBtn>
@@ -246,6 +284,7 @@ export function RichTextEditor({ value, onChange }: Props) {
         onInput={emit}
         onBlur={emit}
         className="min-h-[140px] px-3 py-2 text-sm focus:outline-none prose max-w-none"
+        style={{ ["--font-heading" as string]: "inherit" }}
       />
     </div>
   );

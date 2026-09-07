@@ -94,8 +94,42 @@ export function PropertiesPanel({ block, onChange, onClose, seo, onSeoChange }: 
           >
             Standaard herstellen (site-achtergrond)
           </button>
-          <p className="text-[11px] text-stone-400 mt-2">
+          <p className="text-[11px] text-stone-400 mt-2 mb-3">
             Wijkt af van de sitekleur én van objectkleuren erin. Werkt ook op secties, kolommen en ruimte-blokken.
+          </p>
+
+          <label className="block text-xs text-stone-500 mb-0.5">
+            Afronding boven ({block.style?.borderRadiusTop ?? 0}px)
+          </label>
+          <input
+            type="range"
+            min={0}
+            max={64}
+            step={2}
+            value={block.style?.borderRadiusTop ?? 0}
+            onChange={(e) => {
+              const v = Number(e.target.value);
+              updateStyle({ borderRadiusTop: v > 0 ? v : undefined });
+            }}
+            className="w-full accent-amber-600"
+          />
+          <label className="block text-xs text-stone-500 mb-0.5 mt-2">
+            Afronding onder ({block.style?.borderRadiusBottom ?? 0}px)
+          </label>
+          <input
+            type="range"
+            min={0}
+            max={64}
+            step={2}
+            value={block.style?.borderRadiusBottom ?? 0}
+            onChange={(e) => {
+              const v = Number(e.target.value);
+              updateStyle({ borderRadiusBottom: v > 0 ? v : undefined });
+            }}
+            className="w-full accent-amber-600"
+          />
+          <p className="text-[11px] text-stone-400 mt-2">
+            Handig voor een gekleurde band (zoals een CTA): zet een achtergrondkleur en rond de boven- en/of onderkant af — zonder aparte lijn of witregel.
           </p>
         </div>
 
@@ -220,7 +254,7 @@ function TextProps({ block, update }: { block: TextBlock; update: (p: Partial<Te
       <Field label="Tekst">
         <RichTextEditor value={block.props.html} onChange={(html) => update({ html })} />
         <p className="text-xs text-stone-400 mt-1">
-          Selecteer tekst en kies vet, schuin, onderstrepen, lettergrootte of een link naar een pagina of URL.
+          Zet de cursor in een alinea of selecteer tekst, kies Stijl (Kop 1–5 of Tekst), en gebruik vet, schuin, grootte of een link.
         </p>
       </Field>
       <Field label="Uitlijning"><Select value={block.props.align} onChange={(v) => update({ align: v as "left"|"center"|"right" })} options={[{value:"left",label:"Links"},{value:"center",label:"Midden"},{value:"right",label:"Rechts"}]} /></Field>

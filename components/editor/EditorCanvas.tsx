@@ -488,7 +488,18 @@ function ColumnsEditor({
   return (
     <div
       className="px-4 py-3"
-      style={block.style?.backgroundColor ? { backgroundColor: block.style.backgroundColor } : undefined}
+      style={{
+        backgroundColor: block.style?.backgroundColor,
+        borderTopLeftRadius: block.style?.borderRadiusTop || undefined,
+        borderTopRightRadius: block.style?.borderRadiusTop || undefined,
+        borderBottomLeftRadius: block.style?.borderRadiusBottom || undefined,
+        borderBottomRightRadius: block.style?.borderRadiusBottom || undefined,
+        overflow:
+          (block.style?.borderRadiusTop ?? 0) > 0 ||
+          (block.style?.borderRadiusBottom ?? 0) > 0
+            ? "hidden"
+            : undefined,
+      }}
     >
       <p className="text-[11px] font-semibold text-amber-800 mb-2">
         Kolommen · sleep blokken naar een kolom
@@ -506,7 +517,13 @@ function ColumnsEditor({
           <div
             key={col.id}
             className="min-h-[140px] min-w-0 rounded-xl border-2 border-dashed border-amber-200 bg-amber-50/40 p-1"
-            style={col.style?.backgroundColor ? { backgroundColor: col.style.backgroundColor } : undefined}
+            style={{
+              backgroundColor: col.style?.backgroundColor,
+              borderTopLeftRadius: col.style?.borderRadiusTop || undefined,
+              borderTopRightRadius: col.style?.borderRadiusTop || undefined,
+              borderBottomLeftRadius: col.style?.borderRadiusBottom || undefined,
+              borderBottomRightRadius: col.style?.borderRadiusBottom || undefined,
+            }}
             onClick={(e) => {
               e.stopPropagation();
               onSelect(col.id);
@@ -558,7 +575,18 @@ function SectionEditor({
   return (
     <div
       className={cn("mx-auto py-2", maxWidths[block.props.maxWidth], pads[block.props.paddingX])}
-      style={block.style ? { backgroundColor: block.style.backgroundColor } : undefined}
+      style={{
+        backgroundColor: block.style?.backgroundColor,
+        borderTopLeftRadius: block.style?.borderRadiusTop || undefined,
+        borderTopRightRadius: block.style?.borderRadiusTop || undefined,
+        borderBottomLeftRadius: block.style?.borderRadiusBottom || undefined,
+        borderBottomRightRadius: block.style?.borderRadiusBottom || undefined,
+        overflow:
+          (block.style?.borderRadiusTop ?? 0) > 0 ||
+          (block.style?.borderRadiusBottom ?? 0) > 0
+            ? "hidden"
+            : undefined,
+      }}
     >
       <CanvasList
         parentId={block.id}

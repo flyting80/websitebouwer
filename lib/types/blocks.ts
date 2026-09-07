@@ -31,6 +31,10 @@ export interface BaseBlock {
     textColor?: string;
     paddingTop?: string;
     paddingBottom?: string;
+    /** Rounded corners on the top edge of the block band (px) */
+    borderRadiusTop?: number;
+    /** Rounded corners on the bottom edge of the block band (px) */
+    borderRadiusBottom?: number;
   };
 }
 
