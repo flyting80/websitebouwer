@@ -516,10 +516,60 @@ function HeroProps({ block, update }: { block: HeroBlock; update: (p: Partial<He
 }
 
 function GalleryProps({ block, update }: { block: GalleryBlock; update: (p: Partial<GalleryBlock["props"]>) => void }) {
+  const layout = block.props.layout ?? "grid";
+  const interval = block.props.intervalSeconds ?? 5;
+
   return (
     <>
-      <Field label="Kolommen"><Select value={String(block.props.columns)} onChange={(v) => update({ columns: Number(v) as 2|3|4 })} options={[{value:"2",label:"2"},{value:"3",label:"3"},{value:"4",label:"4"}]} /></Field>
-      <Field label="Verhouding"><Select value={block.props.aspectRatio} onChange={(v) => update({ aspectRatio: v as GalleryBlock["props"]["aspectRatio"] })} options={[{value:"square",label:"Vierkant"},{value:"landscape",label:"Landschap"},{value:"portrait",label:"Portret"}]} /></Field>
+      <Field label="Weergave">
+        <Select
+          value={layout}
+          onChange={(v) => update({ layout: v as "grid" | "slideshow" })}
+          options={[
+            { value: "grid", label: "Raster (alle foto's)" },
+            { value: "slideshow", label: "Wisselend (één voor één)" },
+          ]}
+        />
+      </Field>
+      {layout === "slideshow" ? (
+        <Field label={`Duur tussen foto's (${interval}s)`}>
+          <input
+            type="range"
+            min={1}
+            max={30}
+            step={1}
+            value={interval}
+            onChange={(e) => update({ intervalSeconds: Number(e.target.value) })}
+            className="w-full accent-amber-600"
+          />
+          <p className="text-[11px] text-stone-400 mt-1">
+            Hoe lang elke foto zichtbaar blijft voordat de volgende komt.
+          </p>
+        </Field>
+      ) : (
+        <Field label="Kolommen">
+          <Select
+            value={String(block.props.columns)}
+            onChange={(v) => update({ columns: Number(v) as 2 | 3 | 4 })}
+            options={[
+              { value: "2", label: "2" },
+              { value: "3", label: "3" },
+              { value: "4", label: "4" },
+            ]}
+          />
+        </Field>
+      )}
+      <Field label="Verhouding">
+        <Select
+          value={block.props.aspectRatio}
+          onChange={(v) => update({ aspectRatio: v as GalleryBlock["props"]["aspectRatio"] })}
+          options={[
+            { value: "square", label: "Vierkant" },
+            { value: "landscape", label: "Landschap" },
+            { value: "portrait", label: "Portret" },
+          ]}
+        />
+      </Field>
       <div className="space-y-2">
         <p className="text-xs font-medium text-stone-600">Afbeeldingen</p>
         {block.props.images.map((img, i) => (

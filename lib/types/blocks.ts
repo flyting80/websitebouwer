@@ -138,6 +138,10 @@ export interface GalleryBlock extends BaseBlock {
     columns: 2 | 3 | 4;
     gap: "sm" | "md" | "lg";
     aspectRatio: "square" | "landscape" | "portrait";
+    /** grid = raster; slideshow = één foto tegelijk die wisselt */
+    layout?: "grid" | "slideshow";
+    /** Seconden tussen foto's in slideshow (standaard 5) */
+    intervalSeconds?: number;
   };
 }
 
@@ -267,7 +271,18 @@ export function createBlock(type: BlockType): Block {
         ],
       } as ColumnsBlock;
     case "gallery":
-      return { id, type, props: { images: [], columns: 3, gap: "md", aspectRatio: "square" } } as GalleryBlock;
+      return {
+        id,
+        type,
+        props: {
+          images: [],
+          columns: 3,
+          gap: "md",
+          aspectRatio: "square",
+          layout: "grid",
+          intervalSeconds: 5,
+        },
+      } as GalleryBlock;
     case "contact-form":
       return { id, type, props: { includeSubject: true, submitLabel: "Versturen", successMessage: "Bedankt! We nemen zo snel mogelijk contact met je op." } } as ContactFormBlock;
     case "embed":

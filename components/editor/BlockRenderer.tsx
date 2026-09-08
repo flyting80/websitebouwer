@@ -451,22 +451,107 @@ function ColumnsRender({
 
 // ─── Gallery ─────────────────────────────────────────────────────────────────
 function GalleryRender({ block }: { block: GalleryBlock }) {
-  const cols = { 2: "grid-cols-2", 3: "grid-cols-3", 4: "grid-cols-4" };
+  const images = block.props.images ?? [];
   const aspects = { square: "aspect-square", landscape: "aspect-video", portrait: "aspect-[3/4]" };
-  if (!(block.props.images ?? []).length) {
+  const layout = block.props.layout ?? "grid";
+
+  if (!images.length) {
     return (
       <div className="mx-6 my-3 h-32 bg-stone-100 rounded-lg flex items-center justify-center text-stone-400 text-sm border border-dashed border-stone-300">
         Voeg afbeeldingen toe in de eigenschappen
       </div>
     );
   }
+
+  if (layout === "slideshow") {
+    return (
+      <GallerySlideshow
+        images={images}
+        aspectClass={aspects[block.props.aspectRatio]}
+        intervalSeconds={block.props.intervalSeconds ?? 5}
+      />
+    );
+  }
+
+  const cols = { 2: "grid-cols-2", 3: "grid-cols-3", 4: "grid-cols-4" };
   return (
     <div className={cn("grid px-6 py-3", cols[block.props.columns], `gap-${block.props.gap === "sm" ? "2" : block.props.gap === "md" ? "3" : "4"}`)}>
-      {(block.props.images ?? []).map((img, i) => (
+      {images.map((img, i) => (
         <div key={i} className={cn("overflow-hidden rounded-lg", aspects[block.props.aspectRatio])}>
           <img src={img.url} alt={img.alt} className="w-full h-full object-cover" />
         </div>
       ))}
+    </div>
+  );
+}
+
+function GallerySlideshow({
+  images,
+  aspectClass,
+  intervalSeconds,
+}: {
+  images: Array<{ url: string; alt: string; caption?: string }>;
+  aspectClass: string;
+  intervalSeconds: number;
+}) {
+  const [index, setIndex] = React.useState(0);
+  const [paused, setPaused] = React.useState(false);
+  const ms = Math.max(1, Math.min(120, intervalSeconds || 5)) * 1000;
+
+  React.useEffect(() => {
+    setIndex(0);
+  }, [images.length]);
+
+  React.useEffect(() => {
+    if (images.length < 2 || paused) return;
+    const id = window.setInterval(() => {
+      setIndex((i) => (i + 1) % images.length);
+    }, ms);
+    return () => window.clearInterval(id);
+  }, [images.length, ms, paused]);
+
+  const current = images[index] ?? images[0];
+
+  return (
+    <div
+      className="px-6 py-3"
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+    >
+      <div className={cn("relative overflow-hidden rounded-lg bg-stone-100", aspectClass)}>
+        {images.map((img, i) => (
+          <img
+            key={`${img.url}-${i}`}
+            src={img.url}
+            alt={img.alt}
+            className={cn(
+              "absolute inset-0 w-full h-full object-cover transition-opacity duration-700",
+              i === index ? "opacity-100" : "opacity-0"
+            )}
+          />
+        ))}
+        {current.caption && (
+          <p className="absolute bottom-0 inset-x-0 bg-black/50 text-white text-sm px-3 py-2">
+            {current.caption}
+          </p>
+        )}
+      </div>
+      {images.length > 1 && (
+        <div className="flex justify-center gap-1.5 mt-3">
+          {images.map((_, i) => (
+            <button
+              key={i}
+              type="button"
+              aria-label={`Foto ${i + 1}`}
+              onClick={() => setIndex(i)}
+              className={cn(
+                "h-2 rounded-full transition-all",
+                i === index ? "w-5 bg-stone-700" : "w-2 bg-stone-300 hover:bg-stone-400"
+              )}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }

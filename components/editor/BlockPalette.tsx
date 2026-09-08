@@ -31,7 +31,7 @@ export const PALETTE_ITEMS: { type: BlockType; label: string; icon: React.Elemen
   { type: "button", label: "Knop", icon: MousePointer, description: "Call-to-action knop" },
   { type: "columns", label: "Kolommen", icon: Columns, description: "2–4 kolommen met eigen breedtes" },
   { type: "section", label: "Sectie", icon: Layout, description: "Container blok" },
-  { type: "gallery", label: "Galerij", icon: Grid, description: "Afbeeldingsraster" },
+  { type: "gallery", label: "Galerij", icon: Grid, description: "Raster of wisselende foto's" },
   { type: "card-grid", label: "Kaarten", icon: Layout, description: "Kaart-raster" },
   { type: "contact-form", label: "Formulier", icon: MessageSquare, description: "Contactformulier" },
   { type: "embed", label: "Video", icon: Film, description: "YouTube of Vimeo" },
